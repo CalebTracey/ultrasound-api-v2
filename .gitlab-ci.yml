@@ -24,6 +24,7 @@ variables:
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
   CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
+  DOCKER_DRIVER: overlay
 
 image: gitlab/dind
 services:
@@ -31,11 +32,11 @@ services:
 
 stages:
   - test
-  - build:jar
+  - build:maven
   - build:image
   - deploy:dev
 
-maven-build:
+build:maven:
   image: maven:3.8-openjdk-11
   stage: build:jar
   script: "mvn clean package -B"
@@ -43,7 +44,7 @@ maven-build:
     paths:
       - target/*.jar
 
-docker-build:
+build:docker:
   stage: build:image
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -70,8 +71,8 @@ deploy:dev:
 
 .deploy:
   dependencies:
-    - maven-build
-    - docker-build
+    - build:maven
+    - build:image
 
 .common:dev:
   environment:
