@@ -4,7 +4,7 @@
   executor = "docker"
   [runners.docker]
     tls_verify = false
-    image = "docker:20.10.14"
+    image = "docker:stable"
     privileged = true
     disable_cache = false
     volumes = ["/cache","/var/run/docker.sock:/var/run/docker.sock"]
