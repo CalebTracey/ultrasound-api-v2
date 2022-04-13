@@ -12,10 +12,10 @@ import org.springframework.context.annotation.Profile;
 @Profile("prod")
 public class AWSCredentialsConfigProd implements AWSCredentials {
 
-    @Value("${aws.access.key.id}")
+    @Value("${AWS_ACCESS_KEY_ID}")
     private String awsAccessKey;
 
-    @Value("${aws.secret.key}")
+    @Value("${AWS_SECRET_ACCESS_KEY}")
     private String awsSecretKey;
 
     @Override

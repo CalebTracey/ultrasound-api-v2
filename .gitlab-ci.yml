@@ -33,7 +33,7 @@ variables:
 stages:
   - verify
   - test
-  # - build
+  - build
   - deploy:dev
 
 # This template uses openjdk11 for verifying and deploying images
@@ -47,7 +47,7 @@ cache:
     - .m2/repository
 
 test_variables:
-  stage: test
+  stage: verify
   script:
     - echo "$CI_API_V4_URL $CI_PROJECT_ID"
 
@@ -64,6 +64,22 @@ test_variables:
 # Verify merge requests using JDK11
 verify:openjdk11:
   <<: *verify
+
+.build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}"
+  rules:
+    - if: $CI_COMMIT_TAG
 
 # To deploy packages from CI, create a ci_settings.xml file
 # For deploying packages to GitLab's Maven Repository: See https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for more details.
