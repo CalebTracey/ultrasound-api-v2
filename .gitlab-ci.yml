@@ -38,7 +38,7 @@ stages:
 
 build:maven:
   image: maven:3.8-openjdk-11
-  stage: build:jar
+  stage: build:maven
   script: "mvn clean package -B"
   artifacts:
     paths:
