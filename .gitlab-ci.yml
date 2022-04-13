@@ -30,6 +30,12 @@ variables:
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
 
+stages:
+  - verify
+  - test
+  - build
+  - deploy:dev
+
 # This template uses openjdk11 for verifying and deploying images
 image: maven:3.8-openjdk-11
 
@@ -42,7 +48,7 @@ cache:
 # For merge requests do not `deploy` but only run `verify`.
 # See https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
 .verify: &verify
-  stage: test
+  stage: verify
   script:
     - 'mvn $MAVEN_CLI_OPTS verify'
   except:
