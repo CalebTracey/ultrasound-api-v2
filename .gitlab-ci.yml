@@ -22,7 +22,7 @@ variables:
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-  CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:$CI_BUILD_REF_NAM
+  CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
   
 stages:
@@ -39,13 +39,14 @@ maven-build:
     paths:
       - target/*.jar
 
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+
 docker-build:
   image: docker:git
   services:
   - docker:dind
   stage: build:image
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
   script:
     - docker build -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
