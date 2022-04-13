@@ -84,21 +84,21 @@ docker-build:
 #     - pwd
 #     - docker run --rm -v ${SHARED_PATH}:/goss -w /goss ${registry}/${image}:${CI_COMMIT_SHA} ls -latr
 #     - exit 1
-
-      - docker build
-      --pull
-      --build-arg http_proxy=$http_proxy
-      --build-arg https_proxy=$https_proxy
-      --build-arg no_proxy=$no_proxy
-      --cache-from $CI_REGISTRY_IMAGE:latest
-      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
-      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
-      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
-      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
-      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
-      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-      .
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+#
+#      - docker build
+#      --pull
+#      --build-arg http_proxy=$http_proxy
+#      --build-arg https_proxy=$https_proxy
+#      --build-arg no_proxy=$no_proxy
+#      --cache-from $CI_REGISTRY_IMAGE:latest
+#      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
+#      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
+#      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
+#      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
+#      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
+#      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+#      .
+#    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 #    - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
 #    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
 #    - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
