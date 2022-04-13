@@ -22,13 +22,8 @@ variables:
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-  CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:$CI_BUILD_REF_NAM
+  CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
-  DOCKER_DRIVER: overlay
-  SPRING_PROFILES_ACTIVE: gitlab-ci
-  USER_GITLAB: sanjaybsm
-  APP_NAME: springbootgitlab
-  REPO: springbootlabtest
 
 image: gitlab/dind
 services:
