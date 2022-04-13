@@ -44,7 +44,7 @@ build:maven:
     paths:
       - target/*.jar
 
-build:docker:
+build:image:
   stage: build:image
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
