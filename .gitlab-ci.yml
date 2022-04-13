@@ -32,6 +32,7 @@ services:
   - docker:dind
 
 stages:
+  - test
   - build
   - package
   - deploy:dev
@@ -62,14 +63,14 @@ cache:
     - .m2/repository
 
 test_variables:
-  stage: verify
+  stage: test
   script:
     - echo "$CI_API_V4_URL $CI_PROJECT_ID"
 
 # For merge requests do not `deploy` but only run `verify`.
 # See https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
 .verify: &verify
-  stage: verify
+  stage: test
   script:
     - 'mvn $MAVEN_CLI_OPTS verify'
   except:
