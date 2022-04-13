@@ -120,21 +120,43 @@
         </dependency>
     </dependencies>
     <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <excludes>
-                            <exclude>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                            </exclude>
-                        </excludes>
-                    </configuration>
-
-                </plugin>
-            </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-image</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                        <configuration>
+                            <image>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <name>${env.CI_REGISTRY_IMAGE}/${project.artifactId}:${project.version}</name>
+                                <publish>true</publish>
+                            </image>
+                            <docker>
+                                <publishRegistry>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <username>${env.CI_REGISTRY_USER}</username>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <password>${env.CI_REGISTRY_PASSWORD}</password>
+                                </publishRegistry>
+                            </docker>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
 
     </build>
 

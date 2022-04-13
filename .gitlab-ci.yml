@@ -1,17 +1,17 @@
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
+# This template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Maven.gitlab-ci.yml
-
-# Build JAVA applications using Apache Maven (http://maven.apache.org)
 # For docker image tags see https://hub.docker.com/_/maven/
-#
 # For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
+image: docker:stable
 
-# This template will build and test your projects
-# * Caches downloaded dependencies and plugins between invocation.
-# * Verify but don't deploy merge requests.
-# * Deploy built artifacts from master branch only.
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: '$CI_PIPELINE_SOURCE =~ /merge_request_even|web/'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
 
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
@@ -22,40 +22,64 @@ variables:
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
 
-# This template uses jdk8 for verifying and deploying images
-image: maven:3.3.9-jdk-11
+services:
+  - docker:20.10-dind
 
-# Cache downloaded dependencies and plugins between builds.
-# To keep cache across branches add 'key: "$CI_JOB_NAME"'
+before_script:
+  - df
+  - cat /etc/resolv.conf
+  - cat /etc/hosts
+
+stages:
+  - test
+  - build
+  - deploy:dev
+
+build:maven:
+  image: maven:3.8-openjdk-11
+  stage: build
+  script: "mvn clean install -B"
+  artifacts:
+    paths:
+      - target/*.jar
+
+build:image:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
+    - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
+
 cache:
+  key: $CI_JOB_NAME
   paths:
     - .m2/repository
 
-# For merge requests do not `deploy` but only run `verify`.
-# See https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
-.verify: &verify
+test_variables:
   stage: test
   script:
-    - 'mvn $MAVEN_CLI_OPTS verify'
-  except:
-    variables:
-      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - echo "$CI_API_V4_URL $CI_PROJECT_ID"
 
-# Verify merge requests using JDK11
-verify:jdk11:
-  <<: *verify
-
-# To deploy packages from CI, create a ci_settings.xml file
-# For deploying packages to GitLab's Maven Repository: See https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for more details.
-# Please note: The GitLab Maven Repository is currently only available in GitLab Premium / Ultimate.
-# For `master` branch run `mvn deploy` automatically.
-deploy:jdk11:
-  stage: deploy
+deploy:dev:
+  extends:
+    - .deploy
+    - .common:dev
+  stage: deploy:dev
   script:
-    - if [ ! -f ci_settings.xml ];
-        then echo "CI settings missing\! If deploying to GitLab Maven Repository, please see https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for instructions.";
-      fi
-    - 'mvn $MAVEN_CLI_OPTS deploy -s ci_settings.xml'
-  only:
-    variables:
-      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - echo "Deploying to dev"
+
+.deploy:
+  dependencies:
+    - build:maven
+    - build:image
+
+.common:dev:
+  environment:
+    name: dev
+  variables:
+    ENVIRONMENT: "dev"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /develop|^FEAT.*$/i'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
