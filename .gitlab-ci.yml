@@ -1,4 +1,5 @@
-image: maven:3.8-openjdk-11
+variables:
+  VERSION: v0.0.1
 
 workflow:
   rules:
@@ -8,23 +9,6 @@ workflow:
     - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
       when: never
     - if: '$CI_COMMIT_BRANCH'
-
-variables:
-  VERSION: v0.0.1
-#  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-#  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-
-#cache:
-#  paths:
-#    - .m2/repository
-#
-#services:
-#  - docker:20.10-dind
-
-#before_script:
-#  - df
-#  - cat /etc/resolv.conf
-#  - cat /etc/hosts
 
 test_variables:
   stage: test
@@ -64,7 +48,7 @@ package:
   script:
     - echo "$TAG"
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}${CI_PROJECT_NAME}:${TAG}
-    - echo "TAG=${TAG" >> tag.env
+    - echo "TAG=${TAG}" >> tag.env
   artifacts:
     reports:
       dotenv: tag.env
