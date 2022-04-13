@@ -2,8 +2,9 @@ concurrent = 1
 check_interval = 0
 
 [[runners]]
+  name = "ultrasound-api"
   url = "https://gitlab.com/"
-  token = RUNNER_TOKEN
+  token = "RGR1348941oSZ22pVYrPJhGNRzyvdY"
   executor = "docker"
   [runners.docker]
     tls_verify = false
