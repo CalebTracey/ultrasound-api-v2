@@ -24,15 +24,35 @@ variables:
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  DOCKER_DRIVER: overlay
+  SPRING_PROFILES_ACTIVE: gitlab-ci
+
+image: docker:latest
+services:
+  - docker:dind
 
 stages:
-  - verify
-  - test
   - build
+  - package
   - deploy:dev
 
+maven-build:
+  image: maven:3.8-openjdk-11
+  stage: build
+  script: "mvn package -B"
+  artifacts:
+    paths:
+      - target/*.jar
+
+docker-build:
+  stage: package
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build -t registry.gitlab.com/ultra207/ultrasound-app/ult-17 .
+    - docker push registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
+
 # This template uses openjdk11 for verifying and deploying images
-image: maven:3.8-openjdk-11
+#image: maven:3.8-openjdk-11
 
 # Cache downloaded dependencies and plugins between builds.
 # To keep cache across branches add 'key: "$CI_JOB_NAME"'
