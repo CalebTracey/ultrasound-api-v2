@@ -1,5 +1,5 @@
 #### Stage 1: Build the application
-FROM maven:3-jdk-11 as maven
+FROM openjdk:11 as build
 
 WORKDIR /app
 
