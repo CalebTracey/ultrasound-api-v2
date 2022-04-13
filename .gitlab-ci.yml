@@ -1,6 +1,5 @@
 variables:
   VERSION: v0.0.1
-
 #workflow:
 #  rules:
 #    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
@@ -9,17 +8,16 @@ variables:
 #    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
 #      when: never
 #    - if: '$CI_COMMIT_BRANCH'
-
-test_variables:
-  stage: test
-  script:
-    - echo "$CI_API_V4_URL $CI_PROJECT_ID"
-
 stages:
   - test
   - build
   - package
   - deploy:dev
+
+test_variables:
+  stage: test
+  script:
+    - echo "$CI_API_V4_URL $CI_PROJECT_ID"
 
 build:
   stage: build
