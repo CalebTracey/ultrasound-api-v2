@@ -1,14 +1,14 @@
 variables:
   VERSION: v0.0.1
 
-workflow:
-  rules:
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
-      when: never
-    - if: '$CI_PIPELINE_SOURCE =~ /merge_request_even|web/'
-    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-      when: never
-    - if: '$CI_COMMIT_BRANCH'
+#workflow:
+#  rules:
+#    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE =~ /merge_request_even|web/'
+#    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH'
 
 test_variables:
   stage: test
@@ -28,12 +28,13 @@ build:
     entrypoint: [ "" ]
   before_script:
     - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n ${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
   only:
     - merge_requests
     - pushes
+    - tags
 
 package:
   stage: package
@@ -44,17 +45,22 @@ package:
     entrypoint: [ "" ]
   before_script:
     - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n ${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
     - echo "$TAG"
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}.${CI_PROJECT_NAME}:${TAG}
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}${CI_PROJECT_NAME}:${TAG}
     - echo "TAG=${TAG}" >> tag.env
   artifacts:
     reports:
       dotenv: tag.env
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: manual
+  only:
+    - merge_requests
+    - pushes
+    - tags
+
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: manual
 
 deploy:dev:
   stage: deploy:dev
