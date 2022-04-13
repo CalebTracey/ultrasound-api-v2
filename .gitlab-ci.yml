@@ -40,7 +40,7 @@ stages:
 build:maven:
   image: maven:3-openjdk-11
   stage: build
-  script: "mvn clean package -B"
+  script: "mvn clean install -B"
   artifacts:
     paths:
       - target/*.jar
@@ -48,9 +48,12 @@ build:maven:
 build:image:
   stage: build
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
-    - docker push registry.gitlab.com/ultra207/ultrasound-app
+    - docker build -t registry.gitlab.com/ultra207/ultrasound-app
+    
+after_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  - docker pull registry.gitlab.com/ultra207/ultrasound-app:latest
+  - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
 
 cache:
   key: $CI_JOB_NAME
