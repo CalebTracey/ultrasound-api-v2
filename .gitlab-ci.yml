@@ -25,10 +25,10 @@ variables:
 services:
   - docker:20.10-dind
 
-before_script:
-  - df
-  - cat /etc/resolv.conf
-  - cat /etc/hosts
+#before_script:
+#  - df
+#  - cat /etc/resolv.conf
+#  - cat /etc/hosts
 
 stages:
   - test
