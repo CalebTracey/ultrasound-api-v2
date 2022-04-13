@@ -58,7 +58,7 @@ build:image:
 #    - echo "$DOCKER_REGISTRY_PASS" | docker login $DOCKER_REGISTRY --username $DOCKER_REGISTRY_USER --password-stdin
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build -t registry.gitlab.com/ultra207/ultrasound-app
+    - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
     - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
 #
 #after_script:
