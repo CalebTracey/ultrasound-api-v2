@@ -1,5 +1,5 @@
 #### Stage 1: Build the application
-FROM maven:3.8-openjdk-11 as build
+FROM 3.8-openjdk-11 as build
 
 ARG CI_USER
 ARG CI_TOKEN
@@ -27,7 +27,7 @@ RUN ./mvnw package -DskipTests
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 #### Stage 2: A minimal docker image with command to run the app
-FROM openjdk:11
+FROM 3.8-openjdk-11
 
 ARG DEPENDENCY=/app/target/dependency
 
