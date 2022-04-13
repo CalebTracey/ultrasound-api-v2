@@ -12,6 +12,14 @@
 # * Caches downloaded dependencies and plugins between invocation.
 # * Verify but don't deploy merge requests.
 # * Deploy built artifacts from master branch only.
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: '$CI_PIPELINE_SOURCE =~ /merge_request_even|web/'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
 
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
