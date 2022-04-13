@@ -1,12 +1,15 @@
+concurrent = 1
+check_interval = 0
+
 [[runners]]
-url = "https://gitlab.com/"
-token = RUNNER_TOKEN
-executor = "docker"
-[runners.docker]
-tls_verify = false
-image = "docker:19.03.12"
-privileged = false
-disable_cache = false
-volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
-[runners.cache]
-Insecure = false
+  url = "https://gitlab.com/"
+  token = RUNNER_TOKEN
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "docker:19.03.12"
+    privileged = true
+    disable_cache = false
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+  [runners.cache]
+    Insecure = false
