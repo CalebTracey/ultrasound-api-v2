@@ -4,7 +4,7 @@
 # For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
 image: docker:20
 services:
-  - docker:20.10-dind
+  - docker:20-dind
 
 workflow:
   rules:
