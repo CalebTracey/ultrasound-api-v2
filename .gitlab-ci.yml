@@ -3,6 +3,8 @@
 # For docker image tags see https://hub.docker.com/_/maven/
 # For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
 image: docker:stable
+services:
+  - docker:20.10-dind
 
 workflow:
   rules:
@@ -21,9 +23,8 @@ variables:
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-
-services:
-  - docker:20.10-dind
+  DOCKER_DRIVER: overlay
+  SPRING_PROFILES_ACTIVE: prod
 
 #before_script:
 #  - df
@@ -33,24 +34,23 @@ services:
 stages:
   - test
   - build
+  - package
   - deploy:dev
 
-build:maven:
-  image: maven:3.8-openjdk-11
+maven-build:
+  image: maven:3-openjdk-11
   stage: build
-  script: "mvn clean install -B"
+  script: "mvn package -B"
   artifacts:
     paths:
       - target/*.jar
 
-build:image:
-  stage: build
+docker-build:
+  stage: package
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
-  dependencies:
-    - build:maven
 
 cache:
   key: $CI_JOB_NAME
@@ -75,8 +75,7 @@ deploy:dev:
 
 .deploy:
   dependencies:
-    - build:maven
-    - build:image
+    - docker-build
 
 .common:dev:
   environment:
