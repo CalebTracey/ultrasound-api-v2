@@ -7,7 +7,7 @@
     image = "docker:20.10.14"
     privileged = true
     disable_cache = false
-    volumes = ["/certs/client", "/cache"]
+    volumes = ["/cache","/var/run/docker.sock:/var/run/docker.sock"]
   [runners.cache]
     [runners.cache.s3]
     [runners.cache.gcs]
