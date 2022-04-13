@@ -34,7 +34,7 @@ stages:
   - verify
   - test
   - build
-  - deploy:dev
+  - deploy
 
 # This template uses openjdk11 for verifying and deploying images
 image: maven:3.8-openjdk-11
