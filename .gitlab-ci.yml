@@ -4,6 +4,7 @@
 # For docker image tags see https://hub.docker.com/_/maven/
 #
 # For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
+image: docker:19.03.12
 
 workflow:
   rules:
@@ -27,10 +28,17 @@ variables:
   DOCKER_DRIVER: overlay
   SPRING_PROFILES_ACTIVE: prod
   APP_NAME: ultrasound-app
+  DOCKER_TLS_CERTDIR: "/certs"
 
-image: gitlab/dind
 services:
-  - docker:stable
+  - docker:19.03.12-dind
+
+before_script:
+  - docker info
+
+#image: gitlab/dind
+#services:
+#  - docker:stable
 
 stages:
   - test
