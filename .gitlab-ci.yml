@@ -38,7 +38,7 @@ stages:
   - deploy:dev
 
 build:maven:
-  image: maven:3.8-openjdk-11
+  image: maven:3-openjdk-11
   stage: build
   script: "mvn clean package -B"
   artifacts:
