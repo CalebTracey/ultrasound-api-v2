@@ -1,5 +1,5 @@
 #### Stage 1: Build the application
-FROM openjdk:11 as build
+FROM maven:3.8-openjdk-11 as build
 
 ARG CI_USER
 ARG CI_TOKEN
