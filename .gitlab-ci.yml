@@ -2,7 +2,7 @@
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Maven.gitlab-ci.yml
 # For docker image tags see https://hub.docker.com/_/maven/
 # For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
-image: docker:stable
+image: docker:20
 services:
   - docker:20.10-dind
 
@@ -15,16 +15,22 @@ workflow:
       when: never
     - if: '$CI_COMMIT_BRANCH'
 
+
+#  # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
+#  # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
+#  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+#  # As of Maven 3.3.0 instead of this you may define these options in `.mvn/maven.config` so the same config is used
+#  # when running from the command line.
+#  # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
+#  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
 variables:
-  # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
-  # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  # As of Maven 3.3.0 instead of this you may define these options in `.mvn/maven.config` so the same config is used
-  # when running from the command line.
-  # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
   DOCKER_DRIVER: overlay
   SPRING_PROFILES_ACTIVE: prod
+  MOUNT_POINT: /builds/$CI_PROJECT_PATH/mnt
+
+before_script:
+  - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+
 
 #before_script:
 #  - df
@@ -47,10 +53,41 @@ maven-build:
 
 docker-build:
   stage: package
+  only:
+    - branches
+  except:
+    - master
   script:
-    - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
+    # fetches the latest image (not failing if image is not found)
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - >
+      docker build -t ${registry}/${image}:${CI_COMMIT_SHA} .
+       --label commit_id=${CI_COMMIT_SHA}
+     - export SHARED_PATH="/builds/$CI_PROJECT_PATH/shared"
+     - mkdir -p ${SHARED_PATH}
+     - cp -a goss.yaml ${SHARED_PATH}/goss.yaml
+     - ls -latr
+     - pwd
+     - docker run --rm -v ${SHARED_PATH}:/goss -w /goss ${registry}/${image}:${CI_COMMIT_SHA} ls -latr 
+     - exit 1
+
+#      - docker build
+#      --pull
+#      --build-arg http_proxy=$http_proxy
+#      --build-arg https_proxy=$https_proxy
+#      --build-arg no_proxy=$no_proxy
+#      --cache-from $CI_REGISTRY_IMAGE:latest
+#      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
+#      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
+#      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
+#      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
+#      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
+#      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+#      .
+#    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+#    - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
+#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+#    - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
 
 cache:
   key: $CI_JOB_NAME
@@ -74,6 +111,8 @@ deploy:dev:
     - git push -f heroku
 
 .deploy:
+  variables:
+    GIT_STRATEGY: none
   dependencies:
     - docker-build
 

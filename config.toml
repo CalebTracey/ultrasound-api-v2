@@ -8,11 +8,11 @@ token = "GR1348941oSZ22pVYrPJhGNRzyvdY"
 executor = "docker"
 [runners.docker]
 tls_verify = false
-image = "docker:dind"
+image = "docker:20.10-dind"
 pull_policy = "if-not-present"
 disable_cache = false
 privileged = true
-volumes = ["/cache","/var/run/docker.sock:/var/run/docker.sock"]
+volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache", "/builds:/builds"]
 shm_size = 0
 [runners.cache]
 insecure = false
