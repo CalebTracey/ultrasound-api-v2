@@ -30,24 +30,23 @@ variables:
 
 image: gitlab/dind
 services:
-  - docker:dind
+  - docker:stable
 
 stages:
   - test
-  - build:maven
-  - build:image
+  - build
   - deploy:dev
 
 build:maven:
   image: maven:3.8-openjdk-11
-  stage: build:maven
+  stage: build
   script: "mvn clean package -B"
   artifacts:
     paths:
       - target/*.jar
 
 build:image:
-  stage: build:image
+  stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
