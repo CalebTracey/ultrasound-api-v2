@@ -1,5 +1,5 @@
 #### Stage 1: Build the application
-FROM openjdk:11-jdk as build
+FROM openjdk:11-alpine as build
 
 ARG CI_USER
 ARG CI_TOKEN
@@ -27,7 +27,7 @@ RUN ./mvnw package -DskipTests
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 #### Stage 2: A minimal docker image with command to run the app
-FROM openjdk:11-jdk
+FROM openjdk:11-alpine
 
 ARG DEPENDENCY=/app/target/dependency
 
