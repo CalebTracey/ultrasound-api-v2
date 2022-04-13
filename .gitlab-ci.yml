@@ -23,17 +23,17 @@ variables:
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-  CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:$CI_COMMIT_REF_SLUG
-  CONTAINER_RELEASE_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
-  DOCKER_DRIVER: overlay
-  SPRING_PROFILES_ACTIVE: prod
-  APP_NAME: ultrasound-app
+#  CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:$CI_COMMIT_REF_SLUG
+#  CONTAINER_RELEASE_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
   DOCKER_TLS_CERTDIR: "/certs"
 
 services:
   - docker:20.10.14-dind
 
 before_script:
+  - df
+  - cat /etc/resolv.conf
+  - cat /etc/hosts
   - docker info
 
 #image: gitlab/dind
