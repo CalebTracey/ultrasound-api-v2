@@ -1,8 +1,6 @@
 #### Stage 1: Build the application
 FROM maven:3-jdk-11 as maven
-
 WORKDIR /app
-
 # copy the Project Object Model file
 COPY pom.xml pom.xml
 
@@ -14,21 +12,13 @@ COPY src src/
 
 # build for release
 # NOTE: my-project-* should be replaced with the proper prefix
-RUN mvn package && cp target/my-project-*.jar app.jar
-
+RUN mvn package && cp target/app-*.jar app.jar
 
 # smaller, final base image
 FROM openjdk:11
-# OPTIONAL: copy dependencies so the thin jar won't need to re-download them
-# COPY --from=maven /root/.m2 /root/.m2
-
-# set deployment directory
+COPY --from=maven /root/.m2 /root/.m2
 WORKDIR /app
-
-# copy over the built artifact from the maven image
 COPY --from=maven /app/app.jar app.jar
-
-# set the startup command to run your binary
 CMD ["java", "-jar", "/app/app.jar"]
 #
 #ARG CI_USER
