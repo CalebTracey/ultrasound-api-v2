@@ -70,6 +70,7 @@ test_variables:
 # For merge requests do not `deploy` but only run `verify`.
 # See https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
 .verify: &verify
+  image: maven:3.8-openjdk-11
   stage: test
   script:
     - 'mvn $MAVEN_CLI_OPTS verify'
