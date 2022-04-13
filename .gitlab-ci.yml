@@ -49,6 +49,8 @@ build:image:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build -t registry.gitlab.com/ultra207/ultrasound-app .
     - docker push registry.gitlab.com/ultra207/ultrasound-app:latest
+  dependencies:
+    - build:maven
 
 cache:
   key: $CI_JOB_NAME
@@ -60,13 +62,16 @@ test_variables:
   script:
     - echo "$CI_API_V4_URL $CI_PROJECT_ID"
 
+  #Development Jobs
+
 deploy:dev:
   extends:
     - .deploy
     - .common:dev
   stage: deploy:dev
   script:
-    - echo "Deploying to dev"
+    - git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/ult-api-dev
+    - git push -f heroku
 
 .deploy:
   dependencies:
