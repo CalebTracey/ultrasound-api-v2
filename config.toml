@@ -1,16 +1,13 @@
-concurrent = 1
-check_interval = 0
-
 [[runners]]
-  name = "ultrasound-api"
-  url = "https://gitlab.com/"
-  token = "RGR1348941oSZ22pVYrPJhGNRzyvdY"
-  executor = "docker"
-  [runners.docker]
-    tls_verify = false
-    image = "docker:20.10.14-dind"
-    privileged = true
-    disable_cache = false
-    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
-  [runners.cache]
-    Insecure = false
+url = "https://gitlab.com/"
+token = TOKEN
+executor = "docker"
+[runners.docker]
+tls_verify = false
+image = "docker:19.03.12"
+privileged = true
+disable_cache = false
+volumes = ["/certs/client", "/cache"]
+[runners.cache]
+[runners.cache.s3]
+[runners.cache.gcs]
