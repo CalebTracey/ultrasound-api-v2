@@ -25,6 +25,8 @@ variables:
   CONTAINER_TEST_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/ultra207/ultrasound-app/ult-17:latest
   DOCKER_DRIVER: overlay
+  SPRING_PROFILES_ACTIVE: prod
+  APP_NAME: ultrasound-app
 
 image: gitlab/dind
 services:
