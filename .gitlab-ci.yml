@@ -11,15 +11,9 @@ workflow:
    - if: '$CI_COMMIT_BRANCH'
 
 stages:
-  - test
   - build
   - package
   - deploy:dev
-
-test_variables:
-  stage: test
-  script:
-    - echo "$CI_API_V4_URL $CI_PROJECT_ID"
 
 build:
   stage: build
@@ -44,15 +38,12 @@ package:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
   before_script:
+    - docker login registry.gitlab.com -u gitlab-ci-token -p $CI_JOB_TOKEN
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
     - echo "$TAG"
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}:${TAG}
-  #   - echo "TAG=${TAG}" >> tag.env
-  # artifacts:
-  #   reports:
-  #     dotenv: tag.env
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}-${CI_PROJECT_NAME}:${TAG}
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /develop|^ULT.*$|^FEAT.*$/i'
       when: manual
