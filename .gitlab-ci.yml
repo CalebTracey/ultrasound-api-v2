@@ -49,10 +49,10 @@ package:
   script:
     - echo "$TAG"
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}${CI_PROJECT_NAME}:${TAG}
-    - echo "TAG=${TAG}" >> tag.env
-  artifacts:
-    reports:
-      dotenv: tag.env
+  #   - echo "TAG=${TAG}" >> tag.env
+  # artifacts:
+  #   reports:
+  #     dotenv: tag.env
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /develop|^ULT.*$|^FEAT.*$/i'
       when: manual
