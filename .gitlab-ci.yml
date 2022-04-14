@@ -1,13 +1,15 @@
 variables:
   VERSION: v0.0.1
-#workflow:
-#  rules:
-#    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
-#      when: never
-#    - if: '$CI_PIPELINE_SOURCE =~ /merge_request_even|web/'
-#    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-#      when: never
-#    - if: '$CI_COMMIT_BRANCH'
+
+workflow:
+ rules:
+   - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+     when: never
+   - if: '$CI_PIPELINE_SOURCE =~ /merge_request_even|web/'
+   - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+     when: never
+   - if: '$CI_COMMIT_BRANCH'
+
 stages:
   - test
   - build
@@ -51,14 +53,11 @@ package:
   artifacts:
     reports:
       dotenv: tag.env
-  only:
-    - merge_requests
-    - pushes
-    - tags
-
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#      when: manual
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /develop|^ULT.*$|^FEAT.*$/i'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
 
 deploy:dev:
   stage: deploy:dev
