@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -56,11 +57,16 @@ public class SubMenuServiceImpl implements SubMenuService{
     @Override
     public MessageResponse deleteById(String id) {
         SubMenu subMenu = getById(id);
-//        Classification classification = classificationService.getByName(subMenu.getClassification());
         String name = subMenu.getName();
+        Classification classification = classificationService.getByName(subMenu.getClassification());
         int count = subMenu.getItemList().size();
         log.info("Deleting Submenu {} and {} listItems",name, count);
         subMenuRepo.delete(subMenu);
+
+        // need to also remove the reference from the classification
+        classification.getSubMenus().remove(name);
+        classificationService.save(classification);
+
         return new MessageResponse("Deleted submenu " + name + " and " + count + " list items");
     }
 
@@ -134,5 +140,49 @@ public class SubMenuServiceImpl implements SubMenuService{
     @Override
     public void deleteTableEntities() {
         subMenuRepo.deleteAll();
+    }
+
+    // clear the gravestones for the submenu and all its items
+    @Override
+    public void clearGravestones() {
+        List<SubMenu> subMenus = subMenuRepo.findAll();
+        subMenus.forEach((s) -> {
+            s.setGravestone(true);
+            s.getItemList().forEach((i) -> {
+                i.setGraveStone(true);
+            });
+            save(s);
+        });
+    }
+
+    /**
+     * Remove any scans from this subMenu that have their gravestone still set.
+     * Also deletes the subMenu itself if its gravestone is still set.
+     * @param subMenuId
+     * @return Number of untouched scans deleted from this subMenu
+     */
+    //
+    @Override
+    public Integer deleteOrphans(String subMenuId) {
+
+        SubMenu subMenu = getById(subMenuId);
+        Integer count = subMenu.getItemList().size();
+
+        Predicate<ListItem> touched = ListItem -> ListItem.getGraveStone().equals(false);
+        List<ListItem> newList = subMenu.getItemList().stream().filter(touched).collect(Collectors.toList());
+
+        subMenu.setItemList(newList);
+        save(subMenu);
+        if (count - subMenu.getItemList().size() > 0) {
+            log.info("Deleted {} scans", count - subMenu.getItemList().size());
+        }
+
+        //also check if the submenu needs deleting
+        if (subMenu.getGravestone()) {
+            deleteById(subMenuId);
+            log.info("deleted subMenu {}", subMenuId );
+        }
+
+        return count - subMenu.getItemList().size();
     }
 }

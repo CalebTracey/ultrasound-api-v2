@@ -19,4 +19,6 @@ public interface SubMenuService {
     MessageResponse editName(Classification classification, SubMenu subMenu, String id, String name);
     MessageResponse editItemName(String id, String currentName, String name, String link);
     void deleteTableEntities();
+    void clearGravestones();
+    Integer deleteOrphans(String subMenuId);
 }

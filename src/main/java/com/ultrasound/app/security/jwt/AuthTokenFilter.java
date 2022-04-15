@@ -36,7 +36,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         try {
             assert request != null;
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != "undefined" && jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -54,12 +54,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
 
         //TODO config for cors "cross-origin"
-        assert response != null;
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Access-Control-Allow-Methods, Authorization, Content-Type");
-        response.setHeader("Access-Control-Max-Age", "3600");
+//        assert response != null;
+//        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+//        response.setHeader("Access-Control-Allow-Credentials", "true");
+//        response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+//        response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Access-Control-Allow-Methods, Authorization, Content-Type");
+//        response.setHeader("Access-Control-Max-Age", "3600");
 
         assert filterChain != null;
         filterChain.doFilter(request, response);

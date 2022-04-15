@@ -14,5 +14,4 @@ public interface ItemService {
     List<ListItem> removeItemFromList(List<ListItem> listItems, String link);
     ListItem editTitle(ListItem item, String classificationName, String subMenuName, String newName);
     ListItem editTitle(ListItem item, String classificationName, String newName);
-
 }

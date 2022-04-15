@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 
@@ -28,12 +29,14 @@ import java.util.List;
 @Slf4j
 @Configuration
 public class S3Config {
-    // TODO uncomment for prod
-        private static AWSCredentialsProviderImplProd credentialsProvider;
+    @Autowired
+    Environment env;
+
+    @Autowired
+    private AWSCredentialsProviderImpl credentialsProvider;
 
     @Bean
-    @Profile("prod")
-    public static AmazonS3 amazonS3Client() throws IOException {
+    public AmazonS3 amazonS3Client() throws IOException {
         BucketCrossOriginConfiguration configuration = new BucketCrossOriginConfiguration();
 
         List<CORSRule.AllowedMethods> rule1AM = new ArrayList<>();
@@ -41,7 +44,7 @@ public class S3Config {
         rule1AM.add(CORSRule.AllowedMethods.POST);
         rule1AM.add(CORSRule.AllowedMethods.DELETE);
         CORSRule rule1 = new CORSRule().withId("CORSRule1").withAllowedMethods(rule1AM)
-                .withAllowedOrigins(List.of("http://localhost:3000", "http://localhost"));
+                .withAllowedOrigins(Arrays.asList(env.getProperty("aws.corsrules.allowedorigins").split(",")));
         List<CORSRule> rules = new ArrayList<>();
         rules.add(rule1);
         configuration.setRules(rules);
@@ -49,12 +52,11 @@ public class S3Config {
         try {
             s3Client = AmazonS3ClientBuilder.standard()
                     .withRegion(Regions.US_EAST_1)
-//                    .withCredentials(new DefaultAWSCredentialsProviderChain()) //dev
-                    .withCredentials(credentialsProvider) //prod
+                    .withCredentials(credentialsProvider)
                     .build();
 
-            String BUCKET_NAME = "ultrasound-files";
-            s3Client.setBucketCrossOriginConfiguration(BUCKET_NAME, configuration);
+            String bucketName = env.getProperty("aws.bucket.name");
+            s3Client.setBucketCrossOriginConfiguration(bucketName, configuration);
             
         } catch (AmazonServiceException e) {
             log.error("AmazonServiceException: {}", e.getErrorMessage());
