@@ -46,14 +46,14 @@
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/exceptions/ClassificationNotFoundException.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/security/service/UserDetailsImpl.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/service/ClassificationService.java
-/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/AWSCredentialsConfigProd.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/exceptions/PresignedUrlAdvice.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/exceptions/ItemNotFoundException.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/repo/RoleRepo.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/model/user/ERole.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/S3Service.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/model/data/ListItem.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/AWSCredentialsProviderImpl.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/exceptions/ItemNotFoundAdvice.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/util/S3Utils.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/exceptions/SubMenuNotFoundException.java
-/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/AWSCredentialsProviderImplProd.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/AWSCredentialsConfig.java

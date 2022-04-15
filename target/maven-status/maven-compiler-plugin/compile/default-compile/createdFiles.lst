@@ -2,7 +2,6 @@ com/ultrasound/app/security/service/UserDetailsImpl.class
 com/ultrasound/app/model/data/Classification.class
 com/ultrasound/app/service/SubMenuService.class
 com/ultrasound/app/controller/util/HealthCheckController.class
-com/ultrasound/app/aws/AWSCredentialsConfigProd.class
 com/ultrasound/app/exceptions/ItemNotFoundAdvice.class
 com/ultrasound/app/controller/util/Name.class
 com/ultrasound/app/service/SubMenuServiceImpl.class
@@ -33,13 +32,13 @@ com/ultrasound/app/mongo/MongoConfig.class
 com/ultrasound/app/aws/S3ServiceImpl.class
 com/ultrasound/app/exceptions/UpdateDatabaseException.class
 com/ultrasound/app/aws/S3ServiceImpl$FileStructureSubMenu.class
-com/ultrasound/app/aws/S3ServiceImpl$FileStructureDataContainer.class
 com/ultrasound/app/exceptions/ClassificationNotFoundAdvice.class
 com/ultrasound/app/controller/S3Controller.class
 com/ultrasound/app/exceptions/ItemNotFoundException.class
 com/ultrasound/app/controller/util/NewItemName.class
 com/ultrasound/app/security/service/UserDetailsServiceImpl.class
 com/ultrasound/app/security/jwt/AuthTokenFilter.class
+com/ultrasound/app/model/data/ListItem$MediaType.class
 com/ultrasound/app/AppApplication.class
 com/ultrasound/app/service/ClassificationService.class
 com/ultrasound/app/service/ItemServiceImpl.class
@@ -47,9 +46,10 @@ com/ultrasound/app/exceptions/ClassificationNotFoundException.class
 com/ultrasound/app/aws/S3Service.class
 com/ultrasound/app/controller/AuthController.class
 com/ultrasound/app/security/jwt/JwtUtils.class
-com/ultrasound/app/aws/AWSCredentialsProviderImplProd.class
+com/ultrasound/app/aws/AWSCredentialsProviderImpl.class
 com/ultrasound/app/repo/RoleRepo.class
 com/ultrasound/app/payload/response/JwtResponse.class
+com/ultrasound/app/aws/AWSCredentialsConfig.class
 com/ultrasound/app/controller/util/NewEmptySubMenu.class
 com/ultrasound/app/model/user/Role.class
 com/ultrasound/app/repo/ClassificationRepo.class

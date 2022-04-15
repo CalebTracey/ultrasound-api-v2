@@ -27,7 +27,6 @@
 #
 #ENTRYPOINT ["java", "-Dserver.port=8080","-classpath","app:app/lib/*","com.ultrasound.app.AppApplication"]
 FROM maven:3.8-openjdk-11 AS build
-ARG SPRING_PROFILES_ACTIVE
 COPY src ./app/src
 COPY pom.xml ./app
 RUN mvn -f ./app/pom.xml clean package
