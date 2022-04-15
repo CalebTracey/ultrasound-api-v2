@@ -7,7 +7,6 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.ultrasound.app.exceptions.SubMenuNotFoundException;
 import com.ultrasound.app.model.data.Classification;
 import com.ultrasound.app.model.data.EType;
 import com.ultrasound.app.model.data.ListItem;
