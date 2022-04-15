@@ -4,7 +4,9 @@ COPY pom.xml ./app
 RUN mvn -f ./app/pom.xml clean package
 
 FROM openjdk:11
+RUN useradd -ms /bin/bash myuser
+USER myuser
 VOLUME /tmp
 COPY --from=build app/target/app-0.0.1-SNAPSHOT.jar ./app.jar
-RUN sh -c 'touch /app.jar'
-ENTRYPOINT ["java", "-Dserver.port=6080", "-Dspring.profiles.active=dev", "-jar", "/app.jar", "--host=0.0.0.0"]
+#RUN -c /bin/bash 'touch /app.jar'
+ENTRYPOINT ["java", "-Dserver.port=$PORT", "-Dspring.profiles.active=prod", "-jar", "/app.jar", "--host=0.0.0.0"]
