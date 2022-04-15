@@ -1,0 +1,75 @@
+variables:
+  VERSION: v0.0.2
+
+workflow:
+ rules:
+   - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+     when: never
+   - if: '$CI_PIPELINE_SOURCE =~ /merge_request_even|web/'
+   - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+     when: never
+   - if: '$CI_COMMIT_BRANCH'
+
+stages:
+  - build
+  - package
+  - deploy:dev
+
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug-edge
+    entrypoint: [ "" ]
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
+  only:
+    - merge_requests
+    - pushes
+    - tags
+
+package:
+  stage: package
+  variables:
+    TAG: ${CI_COMMIT_SHORT_SHA}
+  image:
+    name: gcr.io/kaniko-project/executor:debug-edge
+    entrypoint: [ "" ]
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - echo "$TAG"
+  script:
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /develop|^ULT.*$|^FEAT.*$/i'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+
+deploy:dev:
+  stage: deploy:dev
+  extends:
+    - .deploy
+    - .common:dev
+  script:
+    - echo "Deploying to dev"
+
+.deploy:
+  dependencies:
+    - build
+    - package
+
+.common:dev:
+  environment:
+    name: dev
+  variables:
+    ENVIRONMENT: "dev"
+    CONFIG_PATH: ./src/main/resources/application-dev.properties
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /develop|^FEAT.*$/i'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual

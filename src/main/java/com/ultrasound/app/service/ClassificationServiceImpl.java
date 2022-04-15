@@ -1,6 +1,7 @@
 package com.ultrasound.app.service;
 
 import com.ultrasound.app.exceptions.ClassificationNotFoundException;
+import com.ultrasound.app.exceptions.SubMenuNotFoundException;
 import com.ultrasound.app.exceptions.UpdateDatabaseException;
 import com.ultrasound.app.model.data.Classification;
 import com.ultrasound.app.model.data.EType;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -39,7 +41,7 @@ public class ClassificationServiceImpl implements ClassificationService {
     public MessageResponse createNew(String name) {
         Map<String, String> subMenus = new TreeMap<>();
         Classification classification =
-                new Classification(name, false, new ArrayList<>(), subMenus, EType.TYPE_CLASSIFICATION);
+                new Classification(name, true, new ArrayList<>(), subMenus, EType.TYPE_CLASSIFICATION);
         classificationRepo.insert(classification);
         return new MessageResponse(name + " created");
     }
@@ -135,6 +137,39 @@ public class ClassificationServiceImpl implements ClassificationService {
     @Override
     public void deleteTableEntities() {
         classificationRepo.deleteAll();
+    }
+
+    @Override
+    public void clearGravestones() {
+        for (final Classification c : all()) {
+            c.setGravestone(true);
+            save(c);
+        }
+    }
+
+    @Override
+    public String deleteOrphans() {
+        StringBuilder builder = new StringBuilder();
+
+        // now iterate through the DB entries, deleting any DB records for files we didn't find in S3.
+        List<Classification> classifications = all();
+        classifications.forEach(classification -> {
+
+            classification.getSubMenus().values().forEach(subMenuId -> {
+                try {
+                    subMenuService.deleteOrphans(subMenuId);
+                } catch (SubMenuNotFoundException ex) {
+                    builder.append("Bad submenu id for classification ").append(classification).append(" is ").append(subMenuId);
+                }
+
+            });
+            // delete the classification if it hasn't been touched
+            if (classification.getGravestone()) {
+                deleteById(classification.get_id());
+            }
+        });
+
+        return builder.toString();
     }
 
     @Override

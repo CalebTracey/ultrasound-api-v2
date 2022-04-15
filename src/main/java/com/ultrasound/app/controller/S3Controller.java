@@ -26,6 +26,13 @@ public class S3Controller {
     @Autowired
     private ClassificationServiceImpl classificationService;
 
+    @GetMapping("/list")
+    public ResponseEntity<?> getPreSignedUrl() {
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/S3/list").toUriString());
+        return ResponseEntity.created(uri).body(s3Service.getFileNames());
+    }
+
     @GetMapping("/link/{link}")
     public ResponseEntity<?> getPreSignedUrl(@PathVariable String link) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -34,31 +41,39 @@ public class S3Controller {
                 .orElseThrow(()-> new PresignedUrlException(link)));
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<?> updateBucket() {
+    @PostMapping("/synch")
+    public ResponseEntity<?> synch() {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/S3/update/").toUriString());
-       return ResponseEntity.created(uri).body(s3Service.initializeMongoDatabase());
+                .path("/api/S3/synch/").toUriString());
+        return ResponseEntity.created(uri).body(s3Service.synchronize());
     }
 
-    @PostMapping("/update/newData")
-    public ResponseEntity<?> updateBucketNewData() {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/S3/update/newData").toUriString());
-        return ResponseEntity.created(uri).body(s3Service.updateMongoDatabase());
-    }
+//    @PostMapping("/update")
+//    public ResponseEntity<?> updateBucket() {
+//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+//                .path("/api/S3/update/").toUriString());
+//       return ResponseEntity.created(uri).body(s3Service.initializeMongoDatabase());
+//    }
+//
+//    @PostMapping("/update/newData")
+//    public ResponseEntity<?> updateBucketNewData() {
+//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+//                .path("/api/S3/update/newData").toUriString());
+//        return ResponseEntity.created(uri).body(s3Service.updateMongoDatabase());
+//    }
 
-    @PostMapping("/clean-extensions")
-    public ResponseEntity<?> cleanUnwantedS3Extensions() {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/S3/clean-extensions").toUriString());
-        return ResponseEntity.created(uri).body(s3Utils.cleanBucketFileExtensions());
-    }
-
-    @PostMapping("/export")
-    public  ResponseEntity<?> exportCurrentData() {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/S3/export").toUriString());
-        return ResponseEntity.created(uri).body(s3Utils.updateFileNamesAndExport());
-    }
+    // DPT took out - leaving all filenames intact. Manual cleaning only
+//    @PostMapping("/clean-extensions")
+//    public ResponseEntity<?> cleanUnwantedS3Extensions() {
+//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+//                .path("/api/S3/clean-extensions").toUriString());
+//        return ResponseEntity.created(uri).body(s3Utils.cleanBucketFileExtensions());
+//    }
+//
+//    @PostMapping("/export")
+//    public  ResponseEntity<?> exportCurrentData() {
+//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+//                .path("/api/S3/export").toUriString());
+//        return ResponseEntity.created(uri).body(s3Utils.updateFileNamesAndExport());
+//    }
 }

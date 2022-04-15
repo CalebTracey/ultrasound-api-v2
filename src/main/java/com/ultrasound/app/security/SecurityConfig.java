@@ -71,10 +71,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(@NotNull HttpSecurity http) throws Exception {
         String[] noAuthRoutes = new String[]{
-                        "/api/S3/export", "/", "/api/date", "/api/auth/sign-up", "/api/auth/sign-in", "/api/S3/update/newData"
+                        "/api/S3/export", "/", "/api/date", "/api/auth/sign-up", "/api/auth/sign-in", "/api/S3/update/newData", "/api/all"
         };
         String[] userAuthRoutes = new String[]{
-                        "/api/classifications", "/api/classifications/**", "/api/subMenu/**", "/api/user/**", "/api/S3/link/**"
+                        "/api/classifications", "/api/classifications/**", "/api/subMenu/**", "/api/user/**", "/api/S3/link/**", "/api/S3/list"
         };
         String[] adminAuthRoutes = new String[]{
                 "/**", "/api/**", "/api/tables/clear", "/api/admin/**", "/api/delete-data/classification/*", "/api/delete-data/subMenu/*"
@@ -106,7 +106,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(Arrays.asList(
-                env.getProperty("ultrasound.app.cors-config.urls").split(",")
+                Objects.requireNonNull(env.getProperty("ultrasound.app.cors-config.urls")).split(",")
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "response-type", "x-access-token", "Access-Control-Allow-Origin", "x-requested-with", "access-control-allow-methods", "Accept", "Accept-Language", "Content-Language", "Content-Type"));

@@ -21,6 +21,7 @@ public class SubMenu {
     private String name;
     private List<ListItem> itemList;
     private EType type = EType.TYPE_SUB_MENU;
+    private Boolean gravestone;
 
     public SubMenu(String name, List<ListItem> itemList) {
         this.name = name;
