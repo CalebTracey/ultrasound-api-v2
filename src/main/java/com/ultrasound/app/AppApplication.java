@@ -21,14 +21,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 //@EnableMongoRepositories(basePackages= "com.ultrasound.app.repos")
-@SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
+@SpringBootApplication
+//		(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 public class AppApplication {
 
 	// TODO delete for prod
 
-	@Autowired
-	PasswordEncoder encoder;
-
+//	@Autowired
+//	PasswordEncoder encoder;
+//
 
 	public static void main(String[] args) {
 		SpringApplication.run(AppApplication.class, args);
@@ -36,20 +37,20 @@ public class AppApplication {
 //}
 	// TODO delete for prod
 
-	@Bean
-	CommandLineRunner run(AppUserService userService) {
-		return args -> {
-			Set<Role> adminRoles = new HashSet<>();
-			adminRoles.add(new Role(ERole.ROLE_USER));
-			adminRoles.add(new Role(ERole.ROLE_ADMIN));
-			Set<Role> roles = new HashSet<>();
-			roles.add(new Role(ERole.ROLE_USER));
-			userService.save(new AppUser("Admin", "admin", encoder.encode("admin123#@!"), "admin.email.com", adminRoles));
-			userService.save(new AppUser("Caleb Tracey", "caleb123", encoder.encode("123123"), "caleb.email.com", roles));
-
-		};
+//	@Bean
+//	CommandLineRunner run(AppUserService userService) {
+//		return args -> {
+//			Set<Role> adminRoles = new HashSet<>();
+//			adminRoles.add(new Role(ERole.ROLE_USER));
+//			adminRoles.add(new Role(ERole.ROLE_ADMIN));
+//			Set<Role> roles = new HashSet<>();
+//			roles.add(new Role(ERole.ROLE_USER));
+//			userService.save(new AppUser("Admin", "admin", encoder.encode("admin123#@!"), "admin.email.com", adminRoles));
+//			userService.save(new AppUser("Caleb Tracey", "caleb123", encoder.encode("123123"), "caleb.email.com", roles));
+//
+//		};
 //	}
-	}
+//	}
 }
 
 
