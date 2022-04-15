@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("prod")
 public class AWSCredentialsProviderImplProd implements AWSCredentialsProvider {
 
+    @Autowired
     private AWSCredentialsConfigProd credentialsConfig;
 
     @Override

@@ -36,4 +36,4 @@ FROM openjdk:11
 VOLUME /tmp
 COPY --from=build app/target/app-0.0.1-SNAPSHOT.jar ./app.jar
 RUN sh -c 'touch /app.jar'
-ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "/app.jar"]
