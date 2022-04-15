@@ -6,10 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface S3Service {
-
-    MessageResponse initializeMongoDatabase();
-    MessageResponse updateMongoDatabase();
-//    String updateS3Bucket();
-//    ListObjectsV2Result listObjectsV2();
     Optional<String> getPreSignedUrl(String key);
+    List<String> getFileNames();
 }

@@ -6,17 +6,15 @@
     api:
       # Configuration for building the docker image for the backend service
       build:
-        context: ../react-spring-jwt
+        context: ../ultrasound-app
         dockerfile: Dockerfile
       ports:
-        - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
+        - ${API_CONTAINER_PORT}:8080 # Forward the exposed port 8080 on the container to port 8080 on the host machine
       restart: always
       #    depends_on:
       #      - db # This service depends on mysql. Start that first.
       environment: # Pass environment variables to the service
-        SPRING_PROFILES_ACTIVE: "dev"
-#        SPRING_DATASOURCE_USERNAME: ${JDBC_DATABASE_USERNAME}
-#        SPRING_DATASOURCE_PASSWORD: ${JDBC_DATABASE_PASSWORD}
+        SPRING_PROFILES_ACTIVE: ${SPRING_ACTIVE_PROFILE}
       networks: # Networks to join (Services on the same network can communicate with each other using their name)
         - backend
         - frontend
@@ -24,12 +22,12 @@
     # Frontend Service
     client:
       build:
-        context: react-client # Use an image built from the specified dockerfile
-#        dockerfile: react-client/Dockerfile
+        context: ../ultrasound-client # Use an image built from the specified
+        dockerfile: ../ultrasound-client/Dockerfile
         args:
-          REACT_APP_API_BASE_URL: http://localhost:8080/api/
+          REACT_APP_API_BASE_URL: http://localhost:${API_CONTAINER_PORT}/api/
       ports:
-        - "9090:80" # Map the exposed port 80 on the container to port 9090 on the host machine
+        - ${CLIENT_CONTAINER_PORT}:6088 # Map the exposed port 80 on the container to port 9090 on the host machine
       restart: always
       depends_on:
         - api
@@ -68,7 +66,8 @@
   # HEROKU DEPLOYMENT:
   # - To build jar file run:
   #   docker-compose pull
-  #   docker-compose up --force-recreate --build -d
+  #   docker compose --env-file .env.qa up --force-recreate --build -d
+  # - To look at logs from QA
+  #     docker logs ultrasound-app_api_1 --follow
   # - To push to heroku run:
   #   heroku container:push web --app ultrasound-fellowship-app
-
