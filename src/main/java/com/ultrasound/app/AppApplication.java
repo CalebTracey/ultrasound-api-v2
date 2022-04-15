@@ -25,17 +25,15 @@ import java.util.Set;
 public class AppApplication {
 
 	// TODO delete for prod
-
 //	@Autowired
 //	PasswordEncoder encoder;
-
+//
 
 	public static void main(String[] args) {
 		SpringApplication.run(AppApplication.class, args);
 	}
-//}
-	// TODO delete for prod
 
+	// TODO delete for prod
 //	@Bean
 //	CommandLineRunner run(AppUserService userService) {
 //		return args -> {
