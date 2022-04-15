@@ -35,6 +35,7 @@ public class AppUser {
     @Size(max = 50)
     @Email
     private String email;
+    private Boolean approved;
 
     private Set<Role> roles = new HashSet<>();
 

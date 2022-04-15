@@ -157,23 +157,10 @@ thumb
 sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,react
-/target/classes/static/test-videos/DVT - Subclavian_Axillary DVT - Large IJ - 5783980_crop.mp4
-/target/classes/static/test-videos/DVT - Subclavian_Axillary DVT - Neg Augmentation - 5783980 - 1_crop.mp4
-/target/classes/static/test-videos/DVT - Subclavian_Axillary DVT - 5783980 - 1_crop.mp4
-/target/classes/static/test-videos/ECHO - Fat Pad - 1877442_crop.mp4
-/target/classes/static/test-videos/ECHO - Heart in Zone 8 - A4CMild TR- CMG - 2890404-4_crop.mp4
-/target/classes/static/test-videos/ECHO - Heart in Zone 8 - A4CMod MR- CMG - 2890404-3_crop.mp4
-/target/classes/static/test-videos/ECHO - Heart in Zone 8 - PSLA - CMG - 2890404-1_crop.mp4
-/target/classes/static/test-videos/ECHO - Heart in Zone 8 - PSSA - CMG - 2890404-2_crop.mp4
-/target/classes/static/test-videos/ECHO - Heart in Zone 8 - subcostal - CMG - 2890404-5_crop.mp4
-/target/classes/static/test-videos/LUNG - B lines still see A lines - 2890404_crop.mp4
-/target/classes/static/test-videos/LUNG - consolidation - 2890404_crop.mp4
-/target/classes/static/test-videos/LUNG - consolidation close-up - 2890404_crop.mp4
-/target/classes/static/test-videos/LUNG - consolidation 2 - 2890404_crop.mp4
-/target/classes/static/test-videos/LUNG - Heart in Zone 8 - 2890404 - 6_crop.mp4
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+/target/
 !/src/main/resources/application-prod.properties

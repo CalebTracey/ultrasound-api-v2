@@ -24,6 +24,7 @@ public class Classification {
     private List<ListItem> listItems;
     private Map<String, String> subMenus;
     private EType type = EType.TYPE_CLASSIFICATION;
+    private Boolean gravestone;
 
     public Classification(@NotNull String name, @NotNull Boolean hasSubMenu, List<ListItem> listItems, Map<String, String> subMenus) {
         this.name = name;

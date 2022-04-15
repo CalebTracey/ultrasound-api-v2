@@ -3,6 +3,7 @@ package com.ultrasound.app.controller;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -101,12 +102,26 @@ public class AuthController {
             });
         }
         user.setRoles(roles);
+
+        //talk to Christie to get activated
+        user.setApproved(false);
+
         userRepository.save(user);
+
         // now log them in
-        return getAuthenticatedResponse(registerRequest.getUsername(),registerRequest.getPassword());
+        //return getAuthenticatedResponse(registerRequest.getUsername(),registerRequest.getPassword());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/sign-up").toUriString());
+        return ResponseEntity.created(uri).body(new MessageResponse("Account created. You'll get an email when your account is approved and activated."));
     }
 
     protected ResponseEntity<?> getAuthenticatedResponse(String userName, String password) {
+        // first check if the account has been approved
+        Optional<AppUser> user = userRepository.findByUsername(userName);
+        if (user.isPresent() && user.get().getApproved() != null && !user.get().getApproved()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Account pending approval"));
+        }
+
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);

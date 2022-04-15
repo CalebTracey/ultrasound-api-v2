@@ -26,4 +26,6 @@ public interface ClassificationService {
     MessageResponse deleteSubMenu(String classificationId, String subMenuId);
     MessageResponse editItemName(String id, String currentName, String name, String link);
     void deleteTableEntities();
+    void clearGravestones();
+    String deleteOrphans();
 }
