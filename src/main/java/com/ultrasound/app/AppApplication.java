@@ -20,7 +20,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.HashSet;
 import java.util.Set;
 
-//@EnableMongoRepositories(basePackages= "com.ultrasound.app.repos")
 @SpringBootApplication
 //		(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 public class AppApplication {
@@ -29,7 +28,7 @@ public class AppApplication {
 
 //	@Autowired
 //	PasswordEncoder encoder;
-//
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(AppApplication.class, args);
@@ -49,7 +48,7 @@ public class AppApplication {
 //			userService.save(new AppUser("Caleb Tracey", "caleb123", encoder.encode("123123"), "caleb.email.com", roles));
 //
 //		};
-//	}
+//
 //	}
 }
 
