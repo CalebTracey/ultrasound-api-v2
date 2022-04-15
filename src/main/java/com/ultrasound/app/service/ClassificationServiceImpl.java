@@ -141,8 +141,7 @@ public class ClassificationServiceImpl implements ClassificationService {
 
     @Override
     public void clearGravestones() {
-        for (final ListIterator<Classification> i = all().listIterator(); i.hasNext();) {
-            final Classification c = i.next();
+        for (final Classification c : all()) {
             c.setGravestone(true);
             save(c);
         }
@@ -160,7 +159,7 @@ public class ClassificationServiceImpl implements ClassificationService {
                 try {
                     subMenuService.deleteOrphans(subMenuId);
                 } catch (SubMenuNotFoundException ex) {
-                    builder.append("Bad submenu id for classification " + classification + " is " + subMenuId);
+                    builder.append("Bad submenu id for classification ").append(classification).append(" is ").append(subMenuId);
                 }
 
             });

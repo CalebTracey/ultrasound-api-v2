@@ -158,7 +158,6 @@ public class SubMenuServiceImpl implements SubMenuService{
     /**
      * Remove any scans from this subMenu that have their gravestone still set.
      * Also deletes the subMenu itself if its gravestone is still set.
-     * @param subMenuId
      * @return Number of untouched scans deleted from this subMenu
      */
     //
@@ -166,7 +165,7 @@ public class SubMenuServiceImpl implements SubMenuService{
     public Integer deleteOrphans(String subMenuId) {
 
         SubMenu subMenu = getById(subMenuId);
-        Integer count = subMenu.getItemList().size();
+        int count = subMenu.getItemList().size();
 
         Predicate<ListItem> touched = ListItem -> ListItem.getGraveStone().equals(false);
         List<ListItem> newList = subMenu.getItemList().stream().filter(touched).collect(Collectors.toList());

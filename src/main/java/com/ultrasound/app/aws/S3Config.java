@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Configuration
@@ -44,7 +45,7 @@ public class S3Config {
         rule1AM.add(CORSRule.AllowedMethods.POST);
         rule1AM.add(CORSRule.AllowedMethods.DELETE);
         CORSRule rule1 = new CORSRule().withId("CORSRule1").withAllowedMethods(rule1AM)
-                .withAllowedOrigins(Arrays.asList(env.getProperty("aws.corsrules.allowedorigins").split(",")));
+                .withAllowedOrigins(Arrays.asList(Objects.requireNonNull(env.getProperty("aws.corsrules.allowedorigins")).split(",")));
         List<CORSRule> rules = new ArrayList<>();
         rules.add(rule1);
         configuration.setRules(rules);

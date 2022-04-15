@@ -118,7 +118,7 @@ public class AuthController {
     protected ResponseEntity<?> getAuthenticatedResponse(String userName, String password) {
         // first check if the account has been approved
         Optional<AppUser> user = userRepository.findByUsername(userName);
-        if (user.isPresent() && user.get().getApproved() != null && user.get().getApproved() == false) {
+        if (user.isPresent() && user.get().getApproved() != null && !user.get().getApproved()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Account pending approval"));
         }
 

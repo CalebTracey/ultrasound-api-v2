@@ -11,7 +11,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class ListItem {
 
-    public enum MediaType {VIDEO,IMAGE};
+    public enum MediaType {VIDEO,IMAGE}
 
     private String name;
     private String title;
@@ -20,10 +20,4 @@ public class ListItem {
     private EType type = EType.TYPE_ITEM;
     private MediaType mediaType;
     private Boolean graveStone;
-//    public ListItem(String name, String title, String link, Integer sequence, Media) {
-//        this.name = name;
-//        this.title = title;
-//        this.link = link;
-//        this.sequence = sequence;
-//    }
 }

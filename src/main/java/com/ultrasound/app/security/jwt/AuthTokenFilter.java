@@ -2,6 +2,7 @@ package com.ultrasound.app.security.jwt;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -36,7 +37,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         try {
             assert request != null;
             String jwt = parseJwt(request);
-            if (jwt != "undefined" && jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (!Objects.equals(jwt, "undefined") && jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);

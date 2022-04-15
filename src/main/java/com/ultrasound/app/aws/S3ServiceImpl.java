@@ -97,7 +97,7 @@ public class S3ServiceImpl implements S3Service {
 
                 // does the submenu have the listItem?
                 Predicate<ListItem> linkMatch = listItem -> listItem.getLink().equals(fileData.get().getScan().getLink());
-                if (!subMenu.getItemList().stream().anyMatch(linkMatch)) {
+                if (subMenu.getItemList().stream().noneMatch(linkMatch)) {
                     subMenu.getItemList().add(fileData.get().scan);
                 } else {
                     // clear the gravestone
@@ -106,7 +106,7 @@ public class S3ServiceImpl implements S3Service {
                 subMenuService.save(subMenu);
 
             } catch (ParseException e) {
-                builder.append("Bad file name: " + name + " Error: " + e.getMessage() + "</br>");
+                builder.append("Bad file name: ").append(name).append(" Error: ").append(e.getMessage()).append("</br>");
             }
         });
 
@@ -128,9 +128,8 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public List<String> getFileNames() {
-        List<String> s3FileNames = s3FileNames().stream().map(S3ObjectSummary::getKey)     // keys = title of file
+        return s3FileNames().stream().map(S3ObjectSummary::getKey)     // keys = title of file
                 .collect(Collectors.toList());
-        return s3FileNames;
     }
 
     /**
@@ -151,7 +150,7 @@ public class S3ServiceImpl implements S3Service {
         }
 
         //confirm good sequence
-        Integer sequence = 0;
+        int sequence = 0;
         try {
             sequence = Integer.parseInt(splitFilePre[3].trim());
         } catch (NumberFormatException nfe) {

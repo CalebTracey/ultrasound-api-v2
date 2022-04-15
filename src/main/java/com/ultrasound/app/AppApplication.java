@@ -7,7 +7,10 @@ import com.ultrasound.app.service.AppUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,22 +20,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.HashSet;
 import java.util.Set;
 
-//@EnableMongoRepositories(basePackages= "com.ultrasound.app.repos")
 @SpringBootApplication
+//		(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 public class AppApplication {
 
 	// TODO delete for prod
-
 //	@Autowired
 //	PasswordEncoder encoder;
-
+//
 
 	public static void main(String[] args) {
 		SpringApplication.run(AppApplication.class, args);
 	}
-}
-		// TODO delete for prod
 
+	// TODO delete for prod
 //	@Bean
 //	CommandLineRunner run(AppUserService userService) {
 //		return args -> {
@@ -45,7 +46,8 @@ public class AppApplication {
 //			userService.save(new AppUser("Caleb Tracey", "caleb123", encoder.encode("123123"), "caleb.email.com", roles));
 //
 //		};
+//
 //	}
-
+}
 
 
