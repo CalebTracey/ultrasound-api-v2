@@ -9,11 +9,10 @@ import org.springframework.context.annotation.Profile;
 // Prod only - we set local AWS creds through Intellij Plugin for AWS
 
 @Configuration
-@Profile("prod")
-public class AWSCredentialsProviderImplProd implements AWSCredentialsProvider {
+public class AWSCredentialsProviderImpl implements AWSCredentialsProvider {
 
     @Autowired
-    private AWSCredentialsConfigProd credentialsConfig;
+    private AWSCredentialsConfig credentialsConfig;
 
     @Override
     public AWSCredentials getCredentials() {
