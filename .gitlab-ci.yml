@@ -44,7 +44,7 @@ package:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}"
     - echo "$TAG"
   script:
-    - /kaniko/executor --context $CI_PROJECT_DIR --build-arg=GF_SMTP_HOST --dockerfile $CONTAINER_1_DOCKERFILE --destination $CI_REGISTRY_IMAGE/$CI_PROJECT_NAME:latest --destination $CI_REGISTRY_IMAGE/CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
 #    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}${CI_PROJECT_NAME}:${TAG}
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /develop|^ULT.*$|^FEAT.*$/i'
