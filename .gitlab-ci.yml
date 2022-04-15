@@ -18,7 +18,7 @@ stages:
 build:
   stage: build
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: gcr.io/kaniko-project/executor:debug-edge
     entrypoint: [ "" ]
   before_script:
     - mkdir -p /kaniko/.docker
@@ -35,12 +35,12 @@ package:
   variables:
     TAG: ${CI_COMMIT_SHORT_SHA}
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: gcr.io/kaniko-project/executor:debug-edge
     entrypoint: [ "" ]
   script:
     - mkdir -p /kaniko/.docker
     # - echo "{\"auths\":{\"registry.mydomain.de/myusername/mytag\":{\"username\":\"myGitusername\",\"password\":\"myGitpassword\"}}}" > /kaniko/.docker/config.json
-    - echo "{\"auths\":{\"$CI_REGISTRY/$CI_REGISTRY_USER/${TAG}\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - echo "$TAG"
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${CI_REGISTRY}-${CI_PROJECT_NAME}:${TAG}
   rules:
