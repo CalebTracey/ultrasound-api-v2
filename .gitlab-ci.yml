@@ -64,7 +64,7 @@ deploy:stage-prod:
     - buildah bud --iidfile iidfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - buildah push --creds=_:$(heroku auth:token) $(cat iidfile) registry.heroku.com/ultrasound-api /web
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME = "main"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
       when: manual
     
 
