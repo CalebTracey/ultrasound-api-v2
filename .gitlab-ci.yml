@@ -13,7 +13,7 @@ workflow:
 stages:
   - build
   - package
-  - deploy:dev
+  - deploy:prod
 
 build:
   stage: build
@@ -44,32 +44,32 @@ package:
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /develop|^ULT.*$|^FEAT.*$/i'
+    - if: '$CI_COMMIT_REF_NAME =~ /develop'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: manual
 
-deploy:dev:
-  stage: deploy:dev
+deploy:prod:
+  stage: deploy:prod
   extends:
     - .deploy
-    - .common:dev
+    - .common:prod
   script:
-    - echo "Deploying to dev"
+    - echo "Deploying to prod"
 
 .deploy:
   dependencies:
     - build
     - package
 
-.common:dev:
+.common:prod:
   environment:
-    name: dev
+    name: prod
   variables:
-    ENVIRONMENT: "dev"
-    CONFIG_PATH: ./src/main/resources/application-dev.properties
+    ENVIRONMENT: "prod"
+    CONFIG_PATH: ./src/main/resources/application-prod.properties
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /develop|^FEAT.*$/i'
+    - if: '$CI_COMMIT_REF_NAME =~ /develop'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: manual
