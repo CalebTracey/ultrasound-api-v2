@@ -13,7 +13,7 @@ variables:
 stages:
   - build
   - package
-  - stage-build
+  - stage-image
   - deploy:prod
 
 build:
@@ -46,13 +46,14 @@ package:
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
-      when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
-
-stage-build:
-  stage: stage-build
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+  dependencies:
+    - build
+    
+stage-image:
+  stage: stage-image
   variables:
     STORAGE_DRIVER: "vfs"
     BUILDAH_FORMAT: "docker"
@@ -68,7 +69,8 @@ stage-build:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
-    
+  dependencies:
+    - package
 
 deploy:prod:
   stage: deploy:prod
@@ -82,7 +84,7 @@ deploy:prod:
   script:
     - heroku container:release -a ultrasound-api web
   dependencies:
-    - stage-build
+    - stage-image
 
 .deploy:
   dependencies:
