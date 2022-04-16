@@ -50,8 +50,8 @@ package:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ "develop|main"
       when: manual
 
-deploy:stage-build:
-  stage: deploy:stage-build
+deploy:stage-prod:
+  stage: deploy:prod
   variables:
     STORAGE_DRIVER: "vfs"
     BUILDAH_FORMAT: "docker"
