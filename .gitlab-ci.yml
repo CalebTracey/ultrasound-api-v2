@@ -98,6 +98,8 @@ deploy:prod:
     ENVIRONMENT: "prod"
     CONFIG_PATH: ./src/main/resources/application-prod.properties
   rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
