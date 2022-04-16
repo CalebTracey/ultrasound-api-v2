@@ -1,13 +1,11 @@
 package com.ultrasound.app.controller;
 
 import com.ultrasound.app.aws.S3ServiceImpl;
-import com.ultrasound.app.aws.util.S3UtilsImpl;
 import com.ultrasound.app.exceptions.PresignedUrlException;
-import com.ultrasound.app.service.ClassificationServiceImpl;
+import com.ultrasound.app.service.SynchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,9 +20,7 @@ public class S3Controller {
     @Autowired
     private S3ServiceImpl s3Service;
     @Autowired
-    private S3UtilsImpl s3Utils;
-    @Autowired
-    private ClassificationServiceImpl classificationService;
+    private SynchService synchService;
 
     @GetMapping("/list")
     public ResponseEntity<?> getPreSignedUrl() {
@@ -45,35 +41,6 @@ public class S3Controller {
     public ResponseEntity<?> synch() {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/S3/synch/").toUriString());
-        return ResponseEntity.created(uri).body(s3Service.synchronize());
+        return ResponseEntity.created(uri).body(synchService.synchronize(s3Service.getFileNames()));
     }
-
-//    @PostMapping("/update")
-//    public ResponseEntity<?> updateBucket() {
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-//                .path("/api/S3/update/").toUriString());
-//       return ResponseEntity.created(uri).body(s3Service.initializeMongoDatabase());
-//    }
-//
-//    @PostMapping("/update/newData")
-//    public ResponseEntity<?> updateBucketNewData() {
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-//                .path("/api/S3/update/newData").toUriString());
-//        return ResponseEntity.created(uri).body(s3Service.updateMongoDatabase());
-//    }
-
-    // DPT took out - leaving all filenames intact. Manual cleaning only
-//    @PostMapping("/clean-extensions")
-//    public ResponseEntity<?> cleanUnwantedS3Extensions() {
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-//                .path("/api/S3/clean-extensions").toUriString());
-//        return ResponseEntity.created(uri).body(s3Utils.cleanBucketFileExtensions());
-//    }
-//
-//    @PostMapping("/export")
-//    public  ResponseEntity<?> exportCurrentData() {
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-//                .path("/api/S3/export").toUriString());
-//        return ResponseEntity.created(uri).body(s3Utils.updateFileNamesAndExport());
-//    }
 }

@@ -27,12 +27,12 @@ public class ContentController  {
     private ClassificationServiceImpl classificationService;
     @Autowired
     private SubMenuServiceImpl subMenuService;
-    @Autowired
-    private ItemServiceImpl itemService;
+//    @Autowired
+//    private ItemServiceImpl itemService;
     @Autowired
     private AppUserService userService;
-    @Autowired
-    private S3ServiceImpl s3Repository;
+//    @Autowired
+//    private S3ServiceImpl s3Repository;
 
     @GetMapping("/all")
     public String allAccess() {

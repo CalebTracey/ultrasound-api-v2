@@ -2,35 +2,26 @@ package com.ultrasound.app.service;
 
 import com.ultrasound.app.exceptions.ClassificationNotFoundException;
 import com.ultrasound.app.exceptions.SubMenuNotFoundException;
-import com.ultrasound.app.exceptions.UpdateDatabaseException;
 import com.ultrasound.app.model.data.Classification;
 import com.ultrasound.app.model.data.EType;
-import com.ultrasound.app.model.data.ListItem;
 import com.ultrasound.app.model.data.SubMenu;
-import com.ultrasound.app.payload.response.MessageResponse;
 import com.ultrasound.app.repo.ClassificationRepo;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class ClassificationServiceImpl implements ClassificationService {
 
-    @Autowired
     private ClassificationRepo classificationRepo;
-    @Autowired
-    private SubMenuServiceImpl subMenuService;
-    @Autowired
-    private ItemServiceImpl itemService;
+    private SubMenuService subMenuService;
 
     @Override
     public void insert(Classification classification) {
@@ -38,12 +29,41 @@ public class ClassificationServiceImpl implements ClassificationService {
     }
 
     @Override
-    public MessageResponse createNew(String name) {
+    public Classification createNew(String name) {
         Map<String, String> subMenus = new TreeMap<>();
         Classification classification =
-                new Classification(name, true, new ArrayList<>(), subMenus, EType.TYPE_CLASSIFICATION);
+                new Classification(name, true, subMenus, EType.TYPE_CLASSIFICATION);
         classificationRepo.insert(classification);
-        return new MessageResponse(name + " created");
+        return classification;
+    }
+
+    @Override
+    public Classification addNewSubMenu(String classificationId, String subMenuName) {
+        Classification classification = getById(classificationId);
+        SubMenu newSubMenu = subMenuService.createNew(classificationId,subMenuName);
+        Map<String, String> classificationSubMenus = new TreeMap<>(classification.getSubMenus());
+        classificationSubMenus.put(subMenuName, newSubMenu.get_id());
+        classification.setSubMenus(classificationSubMenus);
+        log.info("Added " + subMenuName + " to " + classification.getName());
+        return save(classification);
+
+    }
+
+    @Override
+    public Classification deleteSubMenu(String classificationId, String subMenuId) {
+        Classification classification = getById(classificationId);
+
+        try {
+            SubMenu subMenu = subMenuService.getById(subMenuId);
+            subMenuService.deleteById(subMenu.get_id());
+            // need to also remove the reference from the classification
+            classification.getSubMenus().remove(subMenu.getName());
+        } catch (SubMenuNotFoundException ex) {
+            log.error("Tried to remove subMenuId {} from classification {}. Submenu not found.", subMenuId,classificationId);
+            return classification;
+        }
+
+        return save(classification);
     }
 
     @Override
@@ -68,70 +88,17 @@ public class ClassificationServiceImpl implements ClassificationService {
                 .orElseThrow(() -> new ClassificationNotFoundException(name));
     }
 
-    public String save(@NotNull Classification classification) {
+    public Classification save(@NotNull Classification classification) {
         log.info("Saving classification: {}", classification.getName());
-        return classificationRepo.save(classification).get_id();
-    }
-
-    @Override
-    public @NotNull Optional<List<ListItem>> allDatabaseScans() {
-        List<Classification> allClassifications = classificationRepo.findAll();
-        List<ListItem> scanList = new ArrayList<>();
-        allClassifications.forEach(classification -> {
-            if (classification.getHasSubMenu()) {
-                List<SubMenu> subMenus = classification.getSubMenus().values().stream().map(
-                        id -> subMenuService.getById(id)).collect(Collectors.toList());
-                subMenus.forEach(subMenu -> scanList.addAll(subMenu.getItemList()));
-            }
-            scanList.addAll(classification.getListItems());
-        });
-        log.info("Found " + scanList.size() + " scans in the database");
-        return Optional.of(new ArrayList<>(scanList));
+        return classificationRepo.save(classification);
     }
 
 
-    @Override
-    public List<String> allDatabaseScanLinks() {
-        List<ListItem> allItems = allDatabaseScans().orElseThrow(
-                () -> new UpdateDatabaseException("Problem fetching all scan files from database"));
-        return allItems.stream().map(ListItem::getLink).collect(Collectors.toList());
-    }
 
     @Override
     public List<SubMenu> subMenuObjects(@NotNull Map<String, String> subMenuMap) {
         List<String> subMenuIds = new ArrayList<>(new LinkedHashSet<>(subMenuMap.values()));
         return subMenuIds.stream().map(id -> subMenuService.getById(id)).collect(Collectors.toList());
-    }
-
-    @Override
-    public MessageResponse editName(@NotNull Classification classification, String name) {
-        String origName = classification.getName();
-        classification.setName(name);
-        log.info("Changing Classification name {} to {}",origName, name);
-        classificationRepo.save(classification);
-        return new MessageResponse("Changed Classification name " + origName + " to " + name);
-    }
-
-    @Override
-    public MessageResponse editItemName(String id, String currentName, String name, String link) {
-        Classification classification = getById(id);
-        String className = classification.getName();
-        List<ListItem> listItems = classification.getListItems();
-
-        ListItem item = itemService.findByLink(listItems, link, name, "classification", className);
-        List<ListItem> itemList;
-        if (listItems.size() > 1) {
-            itemList = itemService.removeItemFromList(listItems, link);
-        } else {
-            itemList = new ArrayList<>();
-            itemList.add(item);
-        }
-        item.setName(name);
-        item.setTitle(classification.getName() + " " + name);
-        itemList.add(item);
-        classification.setListItems(new ArrayList<>(new LinkedHashSet<>(itemList)));
-        save(classification);
-        return new MessageResponse("Saved " + currentName + " as " + name + " in " + className);
     }
 
     @Override
@@ -141,10 +108,14 @@ public class ClassificationServiceImpl implements ClassificationService {
 
     @Override
     public void clearGravestones() {
-        for (final Classification c : all()) {
-            c.setGravestone(true);
-            save(c);
-        }
+        List<Classification> classifications = all();
+
+        classifications.forEach(classification -> {
+            classification.setGravestone(true);
+            save(classification);
+        });
+
+        subMenuService.clearGravestones();
     }
 
     @Override
@@ -155,14 +126,24 @@ public class ClassificationServiceImpl implements ClassificationService {
         List<Classification> classifications = all();
         classifications.forEach(classification -> {
 
+            HashMap<String,String> subMenusToRetain = new HashMap<>(classification.getSubMenus());
             classification.getSubMenus().values().forEach(subMenuId -> {
                 try {
-                    subMenuService.deleteOrphans(subMenuId);
+                    String subMenuName = subMenuService.getById(subMenuId).getName();
+                    if (subMenuService.deleteOrphans(subMenuId)) {
+                        // the subMenu was deleted so update the classification
+                        // can't delete it now - concurrent modification
+                        subMenusToRetain.remove(subMenuName);
+                    }
                 } catch (SubMenuNotFoundException ex) {
                     builder.append("Bad submenu id for classification ").append(classification).append(" is ").append(subMenuId);
                 }
-
             });
+
+            // remove unused subMenus
+            classification.setSubMenus(subMenusToRetain);
+            save(classification);
+
             // delete the classification if it hasn't been touched
             if (classification.getGravestone()) {
                 deleteById(classification.get_id());
@@ -173,7 +154,7 @@ public class ClassificationServiceImpl implements ClassificationService {
     }
 
     @Override
-    public MessageResponse deleteById(String id) {
+    public void deleteById(String id) {
         AtomicInteger count = new AtomicInteger(0);
         Classification classification = getById(id);
         String name = classification.getName();
@@ -187,20 +168,5 @@ public class ClassificationServiceImpl implements ClassificationService {
         });
         log.info("Deleting Classification {} and {} submenus", name, count);
         classificationRepo.deleteById(id);
-        return new MessageResponse("Deleted " + name + " and " + count + " submenus");
-    }
-
-    @Override
-    public MessageResponse deleteSubMenu(String classificationId, String subMenuId) {
-        Classification classification = getById(classificationId);
-        String name = classification.getName();
-        String subName = subMenuService.getById(subMenuId).getName();
-        Map<String, String> subMenus = classification.getSubMenus();
-        subMenus.remove(subName, subMenuId);
-        classification.setSubMenus(subMenus);
-        save(classification);
-
-        return new MessageResponse("Deleted " + subName + " and updated the classification " +
-                name);
     }
 }
