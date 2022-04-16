@@ -81,7 +81,7 @@ deploy:prod:
   script:
     - heroku container:release -a ultrasound-api web
   dependencies:
-    - deploy:stage-prod
+    - stage-build
 
 .deploy:
   dependencies:
