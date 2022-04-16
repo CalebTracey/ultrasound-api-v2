@@ -1,6 +1,3 @@
-variables:
-  VERSION: v0.0.2
-
 workflow:
  rules:
    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
@@ -9,11 +6,14 @@ workflow:
    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
      when: never
    - if: '$CI_COMMIT_BRANCH'
+   
+variables:
+  VERSION: v0.0.2
 
 stages:
   - build
   - package
-  - deploy:stage-build
+  - stage-build
   - deploy:prod
 
 build:
@@ -26,10 +26,8 @@ build:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
-  only:
-    - merge_requests
-    - pushes
-    - tags
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 package:
   stage: package
@@ -52,8 +50,8 @@ package:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
 
-deploy:stage-prod:
-  stage: deploy:prod
+stage-build:
+  stage: stage-build
   variables:
     STORAGE_DRIVER: "vfs"
     BUILDAH_FORMAT: "docker"
@@ -66,10 +64,10 @@ deploy:stage-prod:
     - buildah bud --iidfile iidfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - buildah push --creds=_:$(heroku auth:token) $(cat iidfile) registry.heroku.com/ultrasound-api /web
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
-      when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+    
 
 deploy:prod:
   stage: deploy:prod
@@ -83,7 +81,7 @@ deploy:prod:
   script:
     - heroku container:release -a ultrasound-api web
   dependencies:
-    - deploy:stage-prod
+    - stage-build
 
 .deploy:
   dependencies:
