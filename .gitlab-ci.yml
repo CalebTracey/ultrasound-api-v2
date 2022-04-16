@@ -48,7 +48,7 @@ package:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ "develop|main"
-      when: manual
+      when: on_success
 
 deploy:stage-prod:
   stage: deploy:prod
@@ -64,8 +64,9 @@ deploy:stage-prod:
     - buildah bud --iidfile iidfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - buildah push --creds=_:$(heroku auth:token) $(cat iidfile) registry.heroku.com/ultrasound-api /web
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ "develop|main"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME = "main"
       when: manual
+    
 
 deploy:prod:
   stage: deploy:prod
@@ -78,7 +79,9 @@ deploy:prod:
     - curl https://cli-assets.heroku.com/install.sh | sh
   script:
     - heroku container:release -a ultrasound-api web
-  
+  dependencies:
+    - deploy:stage-prod
+
 .deploy:
   dependencies:
     - build
@@ -91,5 +94,5 @@ deploy:prod:
     ENVIRONMENT: "prod"
     CONFIG_PATH: ./src/main/resources/application-prod.properties
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
       when: manual
