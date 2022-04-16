@@ -1,6 +1,3 @@
-variables:
-  VERSION: v0.0.2
-
 workflow:
  rules:
    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
@@ -9,10 +6,14 @@ workflow:
    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
      when: never
    - if: '$CI_COMMIT_BRANCH'
+   
+variables:
+  VERSION: v0.0.2
 
 stages:
   - build
   - package
+  - stage-image
   - deploy:prod
 
 build:
@@ -25,10 +26,9 @@ build:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
-  only:
-    - merge_requests
-    - pushes
-    - tags
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 package:
   stage: package
@@ -40,22 +40,51 @@ package:
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - curl https://cli-assets.heroku.com/install.sh | sh
+    - sed -i '/^mountopt =.*/d' /etc/containers/storage.conf
     - echo "$TAG"
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /develop'
-      when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: manual
+      when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+  dependencies:
+    - build
+    
+stage-image:
+  stage: stage-image
+  variables:
+    STORAGE_DRIVER: "vfs"
+    BUILDAH_FORMAT: "docker"
+  image: registry.gitlab.com/ultra207/ultrasound-app:latest
+  before_script:
+    - dnf install -y nodejs
+    - curl https://cli-assets.heroku.com/install.sh | sh
+    - sed -i '/^mountopt =.*/d' /etc/containers/storage.conf
+  script:
+    - buildah bud --iidfile iidfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - buildah push --creds=_:$(heroku auth:token) $(cat iidfile) registry.heroku.com/ultrasound-api /web
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+  dependencies:
+    - package
 
 deploy:prod:
   stage: deploy:prod
   extends:
     - .deploy
     - .common:prod
+  image: node:10.17-alpine
+  before_script:
+    - apk add curl bash
+    - curl https://cli-assets.heroku.com/install.sh | sh
   script:
-    - echo "=== Deploying to prod ==="
+    - heroku container:release -a ultrasound-api web
+  dependencies:
+    - stage-image
 
 .deploy:
   dependencies:
@@ -67,9 +96,11 @@ deploy:prod:
     name: prod
   variables:
     ENVIRONMENT: "prod"
-    CONFIG_PATH: ./src/main/resources/application-dev.properties
+    CONFIG_PATH: ./src/main/resources/application-prod.properties
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /develop'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: manual
+      when: never
