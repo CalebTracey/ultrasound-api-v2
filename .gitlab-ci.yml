@@ -13,6 +13,7 @@ workflow:
 stages:
   - build
   - package
+  - deploy:stage-build
   - deploy:prod
 
 build:
@@ -40,9 +41,28 @@ package:
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - curl https://cli-assets.heroku.com/install.sh | sh
+    - sed -i '/^mountopt =.*/d' /etc/containers/storage.conf
     - echo "$TAG"
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  only:
+    - develop
+  when: manual
+
+deploy:stage-build:
+  stage: deploy:stage-build
+  variables:
+    STORAGE_DRIVER: "vfs"
+    BUILDAH_FORMAT: "docker"
+  image: registry.gitlab.com/ultra207/ultrasound-app:latest
+  before_script:
+    - dnf install -y nodejs
+    - curl https://cli-assets.heroku.com/install.sh | sh
+    - sed -i '/^mountopt =.*/d' /etc/containers/storage.conf
+  script:
+    - buildah bud --iidfile iidfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - buildah push --creds=_:$(heroku auth:token) $(cat iidfile) registry.heroku.com/ultrasound-api /web
   only:
     - develop
   when: manual
@@ -52,9 +72,15 @@ deploy:prod:
   extends:
     - .deploy
     - .common:prod
+  image: node:10.17-alpine
+  before_script:
+    - apk add curl bash
+    - curl https://cli-assets.heroku.com/install.sh | sh
   script:
-    - echo "Deploying to prod"
-
+    - heroku container:release -a ultrasound-api web
+  only:
+    - develop
+  
 .deploy:
   dependencies:
     - build
