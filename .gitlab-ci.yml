@@ -43,11 +43,9 @@ package:
     - echo "$TAG"
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-  rules:
-    - if: '$CI_COMMIT_REF_NAME =~ "main"'
-      when: manual
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: manual
+  only:
+    - develop
+  when: manual
 
 deploy:prod:
   stage: deploy:prod
@@ -68,8 +66,6 @@ deploy:prod:
   variables:
     ENVIRONMENT: "prod"
     CONFIG_PATH: ./src/main/resources/application-prod.properties
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: on_success
+  only:
+    - develop
+  when: manual
