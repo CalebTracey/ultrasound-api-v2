@@ -47,8 +47,10 @@ package:
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ "develop|main"
-      when: on_success
+    - if: '$CI_COMMIT_REF_NAME =~ /develop|^FEAT.*$/i'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
 
 deploy:stage-prod:
   stage: deploy:prod
@@ -64,7 +66,7 @@ deploy:stage-prod:
     - buildah bud --iidfile iidfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - buildah push --creds=_:$(heroku auth:token) $(cat iidfile) registry.heroku.com/ultrasound-api /web
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: '$CI_COMMIT_REF_NAME =~ /develop|^FEAT.*$/i'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
@@ -95,7 +97,7 @@ deploy:prod:
     ENVIRONMENT: "prod"
     CONFIG_PATH: ./src/main/resources/application-prod.properties
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: '$CI_COMMIT_REF_NAME =~ /develop|^FEAT.*$/i'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
