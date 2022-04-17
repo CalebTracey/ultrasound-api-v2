@@ -11,26 +11,26 @@ variables:
   VERSION: v0.0.2
 
 stages:
-  - test
+  # - test
   - build
   - package
   - stage-image
   - deploy:prod
 
-test:
-  stage: test
-  image: 
-    name: maven:3-jdk-11
-    entrypoint: [ "" ]
-  script: "mvn test"
-  artifacts:
-    paths:
-      - target/surefire-reports/TEST-*.xml
-    reports:
-      junit:
-        - target/surefire-reports/TEST-*.xml
+# test:
+#   stage: test
+#   image: 
+#     name: maven:3-jdk-11
+#     entrypoint: [ "" ]
+#   script: "mvn test"
+#   artifacts:
+#     paths:
+#       - target/surefire-reports/TEST-*.xml
+#     reports:
+#       junit:
+#         - target/surefire-reports/TEST-*.xml
 
-build:
+test-build:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:debug-edge
@@ -68,7 +68,7 @@ package:
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
   dependencies:
-    - test
+    - test-build
     
 stage-image:
   stage: stage-image
