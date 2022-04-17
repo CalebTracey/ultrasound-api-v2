@@ -22,7 +22,7 @@ test:
   image: 
     name: maven:3-jdk-11
     entrypoint: [ "" ]
-  script: "mvn package"
+  script: "mvn test"
   artifacts:
     paths:
       - target/surefire-reports/TEST-*.xml
