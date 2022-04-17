@@ -11,10 +11,24 @@ variables:
   VERSION: v0.0.2
 
 stages:
+  - test
   - build
   - package
   - stage-image
   - deploy:prod
+
+test:
+  stage: test
+  image: 
+    name: maven:3-jdk-11
+    entrypoint: [ "" ]
+  script: "mvn test"
+  artifacts:
+    paths:
+      - target/surefire-reports/TEST-*.xml
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
 
 build:
   stage: build
@@ -29,6 +43,10 @@ build:
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
 
 package:
   stage: package
@@ -52,7 +70,7 @@ package:
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
   dependencies:
-    - build
+    - test
     
 stage-image:
   stage: stage-image
