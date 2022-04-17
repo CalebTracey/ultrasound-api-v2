@@ -12,13 +12,13 @@ public interface SubMenuService {
     SubMenu getById(String id);
     String insert(SubMenu subMenu);
     boolean existsById(String id);
-    MessageResponse moveSubMenuItem(String oldParentId, String newParentId, ListItem item);
+//    MessageResponse moveSubMenuItem(String oldParentId, String newParentId, ListItem item);
     MessageResponse deleteById(String id);
-    MessageResponse createNew(String classificationId, String name);
-    MessageResponse deleteByIdClassification(String classificationId, String subMenuId);
-    MessageResponse editName(Classification classification, SubMenu subMenu, String id, String name);
-    MessageResponse editItemName(String id, String currentName, String name, String link);
+    SubMenu createNew(String classificationId, String name);
+//    MessageResponse deleteByIdClassification(String classificationId, String subMenuId);
+//    MessageResponse editName(Classification classification, SubMenu subMenu, String id, String name);
+//    MessageResponse editItemName(String id, String currentName, String name, String link);
     void deleteTableEntities();
     void clearGravestones();
-    Integer deleteOrphans(String subMenuId);
+    Boolean deleteOrphans(String subMenuId);
 }

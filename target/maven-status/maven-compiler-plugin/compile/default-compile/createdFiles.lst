@@ -12,7 +12,6 @@ com/ultrasound/app/service/AppUserService.class
 com/ultrasound/app/service/ItemService.class
 com/ultrasound/app/controller/SubMenuController.class
 com/ultrasound/app/model/data/SubMenu.class
-com/ultrasound/app/aws/S3ServiceImpl$SingleFileStructure.class
 com/ultrasound/app/security/jwt/AuthEntryPointJwt.class
 com/ultrasound/app/controller/ClassificationController.class
 com/ultrasound/app/repo/AppUserRepo.class
@@ -31,7 +30,6 @@ com/ultrasound/app/payload/response/MessageResponse.class
 com/ultrasound/app/mongo/MongoConfig.class
 com/ultrasound/app/aws/S3ServiceImpl.class
 com/ultrasound/app/exceptions/UpdateDatabaseException.class
-com/ultrasound/app/aws/S3ServiceImpl$FileStructureSubMenu.class
 com/ultrasound/app/exceptions/ClassificationNotFoundAdvice.class
 com/ultrasound/app/controller/S3Controller.class
 com/ultrasound/app/exceptions/ItemNotFoundException.class
