@@ -12,4 +12,4 @@ VOLUME /tmp
 COPY --from=build app/target/app-0.0.1-SNAPSHOT.jar ./app.jar
 RUN touch /app.jar
 USER myuser
-ENTRYPOINT ["java", "-Dserver.port=$PORT", "-Dspring.profiles.active=prod", "-jar", "/app.jar", "--host=0.0.0.0"]
+ENTRYPOINT ["java", "-Dfile.encoding=UTF-8", "-Xmx300m", "-Xss512k", "-XX:CICompilerCount=2", "-Dserver.port=$PORT", "-Dspring.profiles.active=prod", "-jar", "/app.jar"]
