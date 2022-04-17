@@ -11,10 +11,20 @@ variables:
   VERSION: v0.0.2
 
 stages:
+  - test
   - build
   - package
   - stage-image
   - deploy:prod
+
+test:
+  stage: test
+  script:
+    - gradle test
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
 
 build:
   stage: build
