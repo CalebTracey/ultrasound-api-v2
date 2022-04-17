@@ -11,10 +11,24 @@ variables:
   VERSION: v0.0.2
 
 stages:
+  - test
   - build
   - package
   - stage-image
   - deploy:prod
+
+test:
+  stage: test
+  image: 
+    name: maven:3-jdk-11
+    entrypoint: [ "" ]
+  script: "mvn test"
+  artifacts:
+    paths:
+      - target/surefire-reports/TEST-*.xml
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
 
 build:
   stage: build
@@ -27,6 +41,8 @@ build:
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
   rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+      when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
@@ -40,10 +56,10 @@ package:
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  script:
     - curl https://cli-assets.heroku.com/install.sh | sh
     - sed -i '/^mountopt =.*/d' /etc/containers/storage.conf
     - echo "$TAG"
-  script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
@@ -52,7 +68,7 @@ package:
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
   dependencies:
-    - build
+    - test
     
 stage-image:
   stage: stage-image
