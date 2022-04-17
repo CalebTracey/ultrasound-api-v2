@@ -1,3 +1,5 @@
-/Users/dtracey/code/personal/ultrasound-app/src/test/java/com/ultrasound/app/aws/S3RepositoryTest.java
-/Users/dtracey/code/personal/ultrasound-app/src/test/java/com/ultrasound/app/AppApplicationTests.java
-/Users/dtracey/code/personal/ultrasound-app/src/test/java/com/ultrasound/app/aws/SyncServiceTest.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/test/java/com/ultrasound/app/service/SyncServiceTest.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/test/java/com/ultrasound/app/service/SubMenuServiceTest.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/test/java/com/ultrasound/app/aws/S3RepositoryTest.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/test/java/com/ultrasound/app/service/ClassificationServiceTest.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/test/java/com/ultrasound/app/AppApplicationTests.java

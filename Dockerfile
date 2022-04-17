@@ -5,6 +5,7 @@ RUN mvn -f ./app/pom.xml clean package
 
 FROM openjdk:11
 RUN useradd -ms /bin/bash myuser
+RUN /bin/sh -c "apk add --no-cache bash"
 USER myuser
 VOLUME /tmp
 COPY --from=build app/target/app-0.0.1-SNAPSHOT.jar ./app.jar
