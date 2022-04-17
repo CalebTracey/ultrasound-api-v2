@@ -18,6 +18,19 @@ stages:
   - deploy:prod
 
 test:
+  stage: test
+  image: 
+    name: maven:3-jdk-11
+    entrypoint: [ "" ]
+  script: "mvn package"
+  artifacts:
+    paths:
+      - target/surefire-reports/TEST-*.xml
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+
+build:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:debug-edge
@@ -27,7 +40,6 @@ test:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
-    - mvn test
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
