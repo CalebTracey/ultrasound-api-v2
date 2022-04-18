@@ -30,28 +30,6 @@ test-build:
       junit:
         - $CI_PROJECT_DIR/target/surefire-reports/TEST-*.xml
 
-# build-image:
-#   stage: build
-#   variables:
-#     TAG: ${CI_COMMIT_SHORT_SHA}
-#   image:
-#     name: gcr.io/kaniko-project/executor:debug-edge
-#     entrypoint: [ "" ]
-#   before_script:
-#     - mkdir -p /kaniko/.docker
-#     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-#   script:
-#     - echo "$TAG"
-#     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-#   rules:
-#     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-#       when: never
-#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#       when: never
-#     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
-#   dependencies:
-#     - test-build
-
 push-image:prod:
   stage: push-image:prod
   extends:
@@ -79,8 +57,6 @@ release-image:prod:
     - .common:prod
   script:
     - heroku container:login
-    # - docker pull registry.heroku.com/$HEROKU_APP/web || true
-    # - heroku container:push - app $HEROKU_APP - context-path . web
     - heroku container:release web -a $HEROKU_APP
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
@@ -101,6 +77,7 @@ release-image:prod:
   services:
     - docker:20-dind
   before_script:
+    - apk add libc6-compat
     - apk add curl nodejs bash
     - curl https://cli-assets.heroku.com/install.sh | sh
 
