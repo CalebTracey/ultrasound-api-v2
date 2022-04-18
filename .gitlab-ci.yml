@@ -30,6 +30,9 @@ test:
     reports:
       junit:
         - $CI_PROJECT_DIR/target/surefire-reports/TEST-*.xml
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+      when: never
 
 push-image:prod:
   stage: push-image:prod
@@ -51,8 +54,6 @@ push-image:prod:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
-  dependencies:
-    - test
 
 release-image:prod:
   stage: deploy:prod
