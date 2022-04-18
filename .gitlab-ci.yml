@@ -28,10 +28,10 @@ test-build:
   script: "mvn test"
   artifacts:
     paths:
-      - app/target/surefire-reports/TEST-*.xml
+      - target/surefire-reports/TEST-*.xml
     reports:
       junit:
-        - app/target/surefire-reports/TEST-*.xml
+        - target/surefire-reports/TEST-*.xml
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
