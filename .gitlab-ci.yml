@@ -7,10 +7,6 @@ workflow:
      when: never
    - if: '$CI_COMMIT_BRANCH'
 
-image: docker:20
-services:
-  - docker:20-dind
-
 variables:
   VERSION: v0.0.3
   DOCKER_DRIVER: overlay
@@ -32,13 +28,6 @@ test-build:
     reports:
       junit:
         - $CI_PROJECT_DIR/target/surefire-reports/TEST-*.xml
-  rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
-before_script:
-  - apk add curl nodejs bash
-  - curl https://cli-assets.heroku.com/install.sh | sh
 
 # build-image:
 #   stage: build
@@ -64,6 +53,8 @@ before_script:
 
 push-image:prod:
   stage: deploy:prod
+  extends:
+    - .heroku
   script:
     - heroku container:login
     - docker pull registry.heroku.com/$HEROKU_APP/web || true
@@ -81,6 +72,7 @@ release-image:prod:
   stage: deploy:prod
   extends:
     - .deploy
+    - .heroku
     - .common:prod
   image: $CI_REGISTRY_IMAGE:latest
   services: 
@@ -105,6 +97,14 @@ release-image:prod:
 .deploy:
   dependencies:
     - test
+
+.heroku:
+  image: docker:20
+  services:
+    - docker:20-dind
+  before_script:
+    - apk add curl nodejs bash
+    - curl https://cli-assets.heroku.com/install.sh | sh
 
 .common:prod:
   environment:
