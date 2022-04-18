@@ -6,45 +6,68 @@ workflow:
    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
      when: never
    - if: '$CI_COMMIT_BRANCH'
-   
+
+image: docker:20
+services:
+  - docker:20-dind
+
 variables:
-  VERSION: v0.0.2
+  VERSION: v0.0.3
   DOCKER_DRIVER: overlay
+  HEROKU_APP: ultrasound-api
 
 stages:
   - test
-  - build
-  - push
-  - stage
   - deploy:prod
 
 test-build:
   stage: test
-  image:
-    name: gcr.io/kaniko-project/executor:debug-edge
+  image: 
+    name: maven:3-jdk-11
     entrypoint: [ "" ]
-  before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  script:
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
+  script: "mvn test"
+  artifacts:
+    paths:
+      - target/surefire-reports/TEST-*.xml
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-build-image:
-  stage: build
-  variables:
-    TAG: ${CI_COMMIT_SHORT_SHA}
-  image:
-    name: gcr.io/kaniko-project/executor:debug-edge
-    entrypoint: [ "" ]
-  before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+before_script:
+  - apk add curl nodejs bash
+  - curl https://cli-assets.heroku.com/install.sh | sh
+
+# build-image:
+#   stage: build
+#   variables:
+#     TAG: ${CI_COMMIT_SHORT_SHA}
+#   image:
+#     name: gcr.io/kaniko-project/executor:debug-edge
+#     entrypoint: [ "" ]
+#   before_script:
+#     - mkdir -p /kaniko/.docker
+#     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+#   script:
+#     - echo "$TAG"
+#     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+#   rules:
+#     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+#       when: never
+#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#       when: never
+#     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+#   dependencies:
+#     - test-build
+
+push-image:prod:
+  stage: deploy:prod
   script:
-    - echo "$TAG"
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:latest --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - heroku container:login
+    - docker pull registry.heroku.com/$HEROKU_APP/web || true
+    - heroku container:push - app $HEROKU_APP - context-path . web
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       when: never
@@ -54,7 +77,7 @@ build-image:
   dependencies:
     - test-build
 
-deploy:prod:
+release-image:prod:
   stage: deploy:prod
   extends:
     - .deploy
@@ -77,12 +100,11 @@ deploy:prod:
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
   dependencies:
-    - build-image
+    - push-image:prod
 
 .deploy:
   dependencies:
-    - build
-    - package
+    - test
 
 .common:prod:
   environment:
