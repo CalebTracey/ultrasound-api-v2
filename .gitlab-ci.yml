@@ -16,7 +16,7 @@ variables:
 stages:
   - test
   - push-image:prod
-  # - deploy:prod
+  - deploy:prod
 
 test:
   stage: test
@@ -54,23 +54,27 @@ push-image:prod:
   dependencies:
     - test
 
-# release-image:prod:
-#   stage: deploy:prod
-#   extends:
-#     - .deploy
-#     - .common:prod
-#   script:
-#     - heroku container:login
-#     - heroku container:release web -a $HEROKU_APP
-#   rules:
-#     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-#       when: never
-#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#       when: never
-#     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
-#   dependencies:
-#     - test
-#     - push-image:prod
+release-image:prod:
+  stage: deploy:prod
+  extends:
+    - .deploy
+    - .common:prod
+  image: node:10.17-alpine 
+  before_script:
+    - apk add curl bash
+    - curl https://cli-assets.heroku.com/install.sh | sh
+  script:
+    - heroku container:login
+    - heroku container:release web -app $HEROKU_APP web
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+  dependencies:
+    - test
+    - push-image:prod
 
 .deploy:
   dependencies:
