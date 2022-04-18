@@ -14,6 +14,7 @@ variables:
 
 stages:
   - test
+  - push-image:prod
   - deploy:prod
 
 test-build:
@@ -52,13 +53,15 @@ test-build:
 #     - test-build
 
 push-image:prod:
-  stage: deploy:prod
+  stage: push-image:prod
   extends:
+    - .deploy
     - .heroku
+    - .common:prod
   script:
     - heroku container:login
     - docker pull registry.heroku.com/$HEROKU_APP/web || true
-    - heroku container:push - app $HEROKU_APP - context-path . web
+    - heroku container:push --app $HEROKU_APP --context-path . web
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       when: never
@@ -74,16 +77,10 @@ release-image:prod:
     - .deploy
     - .heroku
     - .common:prod
-  image: $CI_REGISTRY_IMAGE:latest
-  services: 
-    - docker:dind
-  before_script:
-    - apk add curl nodejs bash
-    - curl https://cli-assets.heroku.com/install.sh | sh
   script:
     - heroku container:login
-    - docker pull registry.heroku.com/$HEROKU_APP/web || true
-    - heroku container:push - app $HEROKU_APP - context-path . web
+    # - docker pull registry.heroku.com/$HEROKU_APP/web || true
+    # - heroku container:push - app $HEROKU_APP - context-path . web
     - heroku container:release web -a $HEROKU_APP
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
@@ -92,6 +89,7 @@ release-image:prod:
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
   dependencies:
+    - test-build
     - push-image:prod
 
 .deploy:
