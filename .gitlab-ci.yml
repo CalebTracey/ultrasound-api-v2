@@ -9,6 +9,7 @@ workflow:
    
 variables:
   VERSION: v0.0.2
+  DOCKER_DRIVER: overlay
 
 stages:
   - test
@@ -53,19 +54,22 @@ build-image:
   dependencies:
     - test-build
 
-stage-image:
-  stage: stage
-  variables:
-    STORAGE_DRIVER: "vfs"
-    BUILDAH_FORMAT: "docker"
-  image: registry.gitlab.com/ultra207/ultrasound-app:latest
+deploy:prod:
+  stage: deploy:prod
+  extends:
+    - .deploy
+    - .common:prod
+  image: $CI_REGISTRY_IMAGE:latest
+  services: 
+    - docker:dind
   before_script:
-    - dnf install -y nodejs
+    - apk add curl nodejs bash
     - curl https://cli-assets.heroku.com/install.sh | sh
-    - sed -i '/^mountopt =.*/d' /etc/containers/storage.conf
   script:
-    - buildah bud --iidfile iidfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
-    - buildah push --creds=_:$(heroku auth:token) $(cat iidfile) registry.heroku.com/ultrasound-api /web
+    - heroku container:login
+    - docker pull registry.heroku.com/$HEROKU_APP/web || true
+    - heroku container:push - app $HEROKU_APP - context-path . web
+    - heroku container:release web -a $HEROKU_APP
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       when: never
@@ -74,20 +78,6 @@ stage-image:
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
   dependencies:
     - build-image
-
-deploy:prod:
-  stage: deploy:prod
-  extends:
-    - .deploy
-    - .common:prod
-  image: node:10.17-alpine
-  before_script:
-    - apk add curl bash
-    - curl https://cli-assets.heroku.com/install.sh | sh
-  script:
-    - heroku container:release -a ultrasound-api web
-  dependencies:
-    - stage-image
 
 .deploy:
   dependencies:
