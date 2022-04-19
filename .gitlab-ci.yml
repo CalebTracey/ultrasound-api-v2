@@ -30,6 +30,9 @@ test:
     reports:
       junit:
         - $CI_PROJECT_DIR/target/surefire-reports/TEST-*.xml
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+      when: never
 
 push-image:prod:
   stage: push-image:prod
@@ -51,21 +54,18 @@ push-image:prod:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
-  dependencies:
-    - test
 
 release-image:prod:
   stage: deploy:prod
   extends:
     - .deploy
     - .common:prod
-  image: node:10.17-alpine 
-  before_script:
-    - apk add curl bash
-    - curl https://cli-assets.heroku.com/install.sh | sh
+  image: docker:20
+  services:
+    - docker:20-dind
   script:
-    - heroku container:login
-    - heroku container:release web -app $HEROKU_APP web
+    - docker login --username=_ --password=$HEROKU_API_KEY registry.heroku.com
+    - docker run --rm -e HEROKU_API_KEY=$HEROKU_API_KEY wingrunr21/alpine-heroku-cli container:release web --app $HEROKU_APP
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       when: never
