@@ -75,6 +75,7 @@ release-image:prod:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
+      when: manual
   dependencies:
     - test
     - push-image:prod
