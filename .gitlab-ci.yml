@@ -8,7 +8,7 @@ workflow:
    - if: '$CI_COMMIT_BRANCH'
 
 variables:
-  VERSION: v0.0.3
+  VERSION: v0.0.4
   DOCKER_DRIVER: overlay
   HEROKU_REGISTRY: registry.heroku.com
   HEROKU_APP: ultrasound-api
