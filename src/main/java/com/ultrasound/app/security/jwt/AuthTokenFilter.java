@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.ultrasound.app.security.service.UserDetailsServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+
+    @Autowired
+    Environment env;
 
     @Override
     protected void doFilterInternal(
@@ -56,7 +60,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         //TODO config for cors "cross-origin"
 //        assert response != null;
-//        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        assert response != null;
+        response.setHeader("Access-Control-Allow-Origin", env.getProperty("ultrasound.app.cors-config.urls"));
 //        response.setHeader("Access-Control-Allow-Credentials", "true");
 //        response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
 //        response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Access-Control-Allow-Methods, Authorization, Content-Type");
