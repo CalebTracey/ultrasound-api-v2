@@ -40,7 +40,6 @@ test:
 push-image:prod:
   stage: push-image:prod
   extends:
-    - .deploy
     - .common:prod
   image:
     name: gcr.io/kaniko-project/executor:debug-edge
@@ -52,10 +51,6 @@ push-image:prod:
     - echo "$TAG"
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $HEROKU_REGISTRY/$HEROKU_APP/web
   rules:
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
 
 release-image:prod:
