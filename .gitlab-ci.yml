@@ -12,6 +12,7 @@ variables:
   DOCKER_DRIVER: overlay
   HEROKU_REGISTRY: registry.heroku.com
   HEROKU_APP: ultrasound-api
+  DOCKER_TLS_CERTDIR: ""
   
 stages:
   - test
