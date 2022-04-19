@@ -84,7 +84,10 @@ release-image:prod:
     ENVIRONMENT: "prod"
     CONFIG_PATH: ./src/main/resources/application-prod.properties
   rules:
+    - if: "$CI_COMMIT_BRANCH"
+      when: never
     - if: '$CI_COMMIT_REF_NAME == "main"'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
