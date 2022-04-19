@@ -34,6 +34,8 @@ test:
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /main|^develop/i'
       when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /main|^develop|^FEAT.*$/i'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 push-image:prod:
   stage: push-image:prod
