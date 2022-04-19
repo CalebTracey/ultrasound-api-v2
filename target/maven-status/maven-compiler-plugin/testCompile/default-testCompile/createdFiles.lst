@@ -1,2 +1,5 @@
+com/ultrasound/app/service/ClassificationServiceTest.class
+com/ultrasound/app/service/SyncServiceTest.class
 com/ultrasound/app/aws/S3RepositoryTest.class
 com/ultrasound/app/AppApplicationTests.class
+com/ultrasound/app/service/SubMenuServiceTest.class

@@ -14,6 +14,7 @@
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/S3Config.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/exceptions/PresignedUrlException.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/exceptions/ClassificationNotFoundAdvice.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/service/SynchServiceImpl.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/controller/util/NewEmptyClassification.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/payload/response/JwtResponse.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/security/SecurityConfig.java
@@ -23,7 +24,7 @@
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/aws/S3ServiceImpl.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/model/user/AppUser.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/repo/SubMenuRepo.java
-/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/service/ItemServiceImpl.java
+/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/service/SynchService.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/service/SubMenuServiceImpl.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/security/jwt/AuthEntryPointJwt.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/security/jwt/AuthTokenFilter.java
@@ -38,7 +39,6 @@
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/controller/S3Controller.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/model/data/EType.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/security/util/CustomAccessDeniedHandler.java
-/Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/service/ItemService.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/model/data/SubMenu.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/service/SubMenuService.java
 /Users/calebtracey/Desktop/1540Project/ultrasound-app/src/main/java/com/ultrasound/app/model/user/Role.java

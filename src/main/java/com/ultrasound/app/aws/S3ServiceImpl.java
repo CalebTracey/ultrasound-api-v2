@@ -57,63 +57,7 @@ public class S3ServiceImpl implements S3Service {
         return env.getProperty("aws.bucket.name");
     }
 
-    // Look at the S3 bucket and make any database changes needed
-    public MessageResponse synchronize() {
-        // clear all the gravestone flags in the DB so we know which ones to delete at the end
-        classificationService.clearGravestones();
-        subMenuService.clearGravestones();
 
-        List<String> files = getFileNames();
-        // iterate over the files and create categories, submenus as needed
-        StringBuilder builder = new StringBuilder();
-
-        files.forEach(name -> {
-            try {
-                Optional<SingleFileStructure> fileData = normalizeFileData(name);
-
-                // does the classification already exist?
-                if (!classificationService.classificationExists(fileData.get().getClassification())) {
-                    // if not, create it
-                    classificationService.createNew(fileData.get().getClassification());
-                }
-
-                Classification classification = classificationService.getByName(fileData.get().getClassification());
-                classification.setGravestone(false);
-                classificationService.save(classification);
-
-                // does the subMenu exist?
-                String submenuName = fileData.get().subMenuName;
-                String submenuId = null;
-                if (!classification.getSubMenus().containsKey(submenuName)) {
-                    subMenuService.createNew(classification.get_id(),submenuName);
-                    classification = classificationService.getByName(fileData.get().getClassification());
-                }
-
-
-                String subMenuId = classification.getSubMenus().get(submenuName);
-                SubMenu subMenu = subMenuService.getById(subMenuId);
-                subMenu.setGravestone(false);
-                subMenuService.save(subMenu);
-
-                // does the submenu have the listItem?
-                Predicate<ListItem> linkMatch = listItem -> listItem.getLink().equals(fileData.get().getScan().getLink());
-                if (subMenu.getItemList().stream().noneMatch(linkMatch)) {
-                    subMenu.getItemList().add(fileData.get().scan);
-                } else {
-                    // clear the gravestone
-                    subMenu.getItemList().stream().filter(linkMatch).findFirst().get().setGraveStone(false);
-                }
-                subMenuService.save(subMenu);
-
-            } catch (ParseException e) {
-                builder.append("Bad file name: ").append(name).append(" Error: ").append(e.getMessage()).append("</br>");
-            }
-        });
-
-        classificationService.deleteOrphans();
-
-        return new MessageResponse(builder.toString());
-    }
 
     private @NotNull List<S3ObjectSummary> s3FileNames() {
         List<S3ObjectSummary> objectListing = s3ListObjects();
@@ -132,50 +76,50 @@ public class S3ServiceImpl implements S3Service {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Utility method that takes a single file name as an input and creates a new
-     * SingleFileStructure object.
-     *
-     * @param file The original file name. Also the key for file in S3 Bucket.
-     * @return A new SingleFileStructure object.
-     */
-    private @NotNull Optional<SingleFileStructure> normalizeFileData(String file) throws ParseException {
-        SingleFileStructure fileStructure = new SingleFileStructure();
-        String fileNormalized = StringUtils.normalizeSpace(file);
-        String[] splitFilePre = StringUtils.split(fileNormalized, "-.");
-
-        //confirm we have all the tokens we need (classification, submenu, listitem, sequence)
-        if (splitFilePre.length != 5) {
-            throw new ParseException("found " + splitFilePre.length + " elements. Expected 5", splitFilePre.length);
-        }
-
-        //confirm good sequence
-        int sequence = 0;
-        try {
-            sequence = Integer.parseInt(splitFilePre[3].trim());
-        } catch (NumberFormatException nfe) {
-            throw new ParseException("Bad sequence number: " + splitFilePre[3], 3);
-        }
-
-        //confirm good filetype
-        String extension = splitFilePre[4].toLowerCase();
-        ListItem.MediaType mediaType = null;
-        if (extension.equals("mp4")) {
-            mediaType = ListItem.MediaType.VIDEO;
-        } else if (extension.equals("jpg") || extension.equals("jpeg") || extension.equals("gif") || extension.equals("png")) {
-            mediaType = ListItem.MediaType.IMAGE;
-        } else {
-            throw new ParseException("Bad file extension " + extension, 4);
-        }
-
-        List<String> splitFile =
-                Arrays.stream(splitFilePre).map(StringUtils::trim).collect(Collectors.toList());
-
-        fileStructure.setClassification(splitFile.get(0)); // set Classification name
-        fileStructure.setSubMenuName(splitFile.get(1));
-        fileStructure.setScan(new ListItem(splitFile.get(2),splitFile.get(2),file,sequence,EType.TYPE_ITEM,mediaType,false));
-        return Optional.of(fileStructure);
-    }
+//    /**
+//     * Utility method that takes a single file name as an input and creates a new
+//     * SingleFileStructure object.
+//     *
+//     * @param file The original file name. Also the key for file in S3 Bucket.
+//     * @return A new SingleFileStructure object.
+//     */
+//    private @NotNull Optional<SingleFileStructure> normalizeFileData(String file) throws ParseException {
+//        SingleFileStructure fileStructure = new SingleFileStructure();
+//        String fileNormalized = StringUtils.normalizeSpace(file);
+//        String[] splitFilePre = StringUtils.split(fileNormalized, "-.");
+//
+//        //confirm we have all the tokens we need (classification, submenu, listitem, sequence)
+//        if (splitFilePre.length != 5) {
+//            throw new ParseException("found " + splitFilePre.length + " elements. Expected 5", splitFilePre.length);
+//        }
+//
+//        //confirm good sequence
+//        int sequence = 0;
+//        try {
+//            sequence = Integer.parseInt(splitFilePre[3].trim());
+//        } catch (NumberFormatException nfe) {
+//            throw new ParseException("Bad sequence number: " + splitFilePre[3], 3);
+//        }
+//
+//        //confirm good filetype
+//        String extension = splitFilePre[4].toLowerCase();
+//        ListItem.MediaType mediaType = null;
+//        if (extension.equals("mp4")) {
+//            mediaType = ListItem.MediaType.VIDEO;
+//        } else if (extension.equals("jpg") || extension.equals("jpeg") || extension.equals("gif") || extension.equals("png")) {
+//            mediaType = ListItem.MediaType.IMAGE;
+//        } else {
+//            throw new ParseException("Bad file extension " + extension, 4);
+//        }
+//
+//        List<String> splitFile =
+//                Arrays.stream(splitFilePre).map(StringUtils::trim).collect(Collectors.toList());
+//
+//        fileStructure.setClassification(splitFile.get(0)); // set Classification name
+//        fileStructure.setSubMenuName(splitFile.get(1));
+//        fileStructure.setScan(new ListItem(splitFile.get(2),splitFile.get(2),file,sequence,EType.TYPE_ITEM,mediaType,false));
+//        return Optional.of(fileStructure);
+//    }
 
     @Override
     public @NotNull Optional<String> getPreSignedUrl(String link) {
@@ -224,36 +168,36 @@ public class S3ServiceImpl implements S3Service {
         return FilenameUtils.isExtension(objectSummary.getKey(), extensions);
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static
-    class SingleFileStructure {
-        private @NotNull String classification;
-        private String subMenuName;
-        private ListItem scan;
-        private String link;
-        private Boolean hasSubMenu;
-        private Boolean hasScan;
-
-        public SingleFileStructure(@NotNull String classification, ListItem scan, String link, Boolean hasSubMenu, Boolean hasScan) {
-            this.classification = classification;
-            this.scan = scan;
-            this.link = link;
-            this.hasSubMenu = hasSubMenu;
-            this.hasScan = hasScan;
-        }
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static
-    class FileStructureSubMenu {
-        private String classification;
-        private String name;
-        private List<ListItem> itemList;
-    }
+//    @Data
+//    @AllArgsConstructor
+//    @NoArgsConstructor
+//    public static
+//    class SingleFileStructure {
+//        private @NotNull String classification;
+//        private String subMenuName;
+//        private ListItem scan;
+//        private String link;
+//        private Boolean hasSubMenu;
+//        private Boolean hasScan;
+//
+//        public SingleFileStructure(@NotNull String classification, ListItem scan, String link, Boolean hasSubMenu, Boolean hasScan) {
+//            this.classification = classification;
+//            this.scan = scan;
+//            this.link = link;
+//            this.hasSubMenu = hasSubMenu;
+//            this.hasScan = hasScan;
+//        }
+//    }
+//
+//    @Data
+//    @AllArgsConstructor
+//    @NoArgsConstructor
+//    public static
+//    class FileStructureSubMenu {
+//        private String classification;
+//        private String name;
+//        private List<ListItem> itemList;
+//    }
 
 }
 

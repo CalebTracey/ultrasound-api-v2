@@ -71,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(@NotNull HttpSecurity http) throws Exception {
         String[] noAuthRoutes = new String[]{
-                        "/api/S3/export", "/", "/api/date", "/api/auth/sign-up", "/api/auth/sign-in", "/api/S3/update/newData", "/api/all"
+                        "/api/S3/export", "/", "/api/date", "/api/auth/sign-up", "/api/auth/sign-in", "/api/S3/update/newData", "/api/all", "/date", "/"
         };
         String[] userAuthRoutes = new String[]{
                         "/api/classifications", "/api/classifications/**", "/api/subMenu/**", "/api/user/**", "/api/S3/link/**", "/api/S3/list"
