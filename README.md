@@ -31,11 +31,11 @@ Also, make sure your application.properties file is configured as such:
 
 3. Run the [Docker Compose](./mongodb/docker-compose.yaml) file found in the mongodb directory.
 
-4. Access the Mongo Express UI at: [localhost:6080](http://localhost:8081/)
+4. Access the Mongo Express UI at: [localhost:8081](http://localhost:8081/)
 
 5. Create the "roles" collection as mentioned above.
 
-6. To populate the database,  make this POST request with [Postman](https://www.postman.com/): http://localhost:8080/api/S3/update
+6. To populate the database, make this POST request with [Postman](https://www.postman.com/): http://localhost:6080/api/S3/update
 
 
 ## Available Scripts
