@@ -1,4 +1,4 @@
-# ultrasound-app
+# ultrasound-api-v2
 <!-- ![](ultrasound-app2.gif) -->
 
 ## Overview
