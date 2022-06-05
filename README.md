@@ -2,18 +2,18 @@
 <!-- ![](ultrasound-app2.gif) -->
 
 ## Overview
-This app was developed for a fellowship program through my local hospital. It provides a way to easily navagate 3000+ .mp4 files. It also allows editing and restructuring of data once the database is initalized. Files are parsed by name and the resulting data is modeled in MongoDB.
+This app was developed for a fellowship program through my local hospital. It provides a way to easily navagate 3000+ .mp4 files and allows editing and restructuring of data through a simple user interface. Files are parsed by name and the resulting data is modeled and stored in a mongo database.
 
 Created with React/TypeScript + Spring Boot + MongoDB. Authentication through Spring Security + JWT for role-based routing and privelages.
 
-[Frontend code](https://github.com/CalebTracey/ultrasound-app-fullstack/tree/main/src/main/react-client)
+See the repository for the frontend below:
+[Frontend code](https://github.com/CalebTracey/ultrasound-ui-v2)
 <br />
-[Backend code](https://github.com/CalebTracey/ultrasound-app-fullstack/tree/main/src/main/java/com/ultrasound/app)
 
 ## Usage
 Currently, you'll need to create and populate an S3 Bucket with .mp4 files and connect it to the backend through the AWS CLI.
 
-Next, create a collection in mongodb called "roles" and add documents "ROLE_USER" and optionally "ROLE_ADMIN" as shown below.
+Next, run the docker-compose file in the mongodb directory and create a collection called "roles" and add documents "ROLE_USER" and "ROLE_ADMIN" as shown below.
 
 Uploading [this file](./roles) through Mongo Express/Compass should do the trick.
 <img src=./document-example.png />
@@ -29,15 +29,14 @@ Also, make sure your application.properties file is configured as such:
 
 2. Download [Docker Desktop App](https://www.docker.com/products/docker-desktop)
 
-3. Run the [Docker Compose](./docker-compose.yaml) file found in the root directory.
+3. Run the [Docker Compose](./mongodb/docker-compose.yaml) file found in the mongodb directory.
 
-4. Access the Mongo Express UI at: [localhost:8081](http://localhost:8081/)
+4. Access the Mongo Express UI at: [localhost:6080](http://localhost:8081/)
 
 5. Create the "roles" collection as mentioned above.
 
 6. To populate the database,  make this POST request with [Postman](https://www.postman.com/): http://localhost:8080/api/S3/update
 
-7. Access the app on [localhost:80](http://localhost:80/) and register!
 
 ## Available Scripts
 If you would rather skip the Docker proccess for the front/backend, follow the steps below. 
