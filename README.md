@@ -6,7 +6,7 @@ This app was developed for a fellowship program through my local hospital. It pr
 
 Created with React/TypeScript + Spring Boot + MongoDB. Authentication through Spring Security + JWT for role-based routing and privelages.
 
-See the repository for the frontend below:
+See the repository for the frontend here: 
 [Frontend code](https://github.com/CalebTracey/ultrasound-ui-v2)
 <br />
 
