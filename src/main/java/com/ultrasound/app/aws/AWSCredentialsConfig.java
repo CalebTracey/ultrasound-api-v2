@@ -12,9 +12,12 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 public class AWSCredentialsConfig implements AWSCredentials {
-    @Autowired
-    Environment env;
+    private final Environment env;
 
+    @Autowired
+    public AWSCredentialsConfig (Environment env) {
+        this.env = env;
+    }
     @Override
     public String getAWSAccessKeyId() {
         return env.getProperty("aws.access.key.id");

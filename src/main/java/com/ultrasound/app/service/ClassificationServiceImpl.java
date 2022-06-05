@@ -20,21 +20,15 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ClassificationServiceImpl implements ClassificationService {
 
-    private ClassificationRepo classificationRepo;
-    private SubMenuService subMenuService;
+    private final ClassificationRepo classificationRepo;
+    private final SubMenuService subMenuService;
 
     @Override
-    public void insert(Classification classification) {
-        classificationRepo.insert(classification);
-    }
-
-    @Override
-    public Classification createNew(String name) {
+    public void createNew(String name) {
         Map<String, String> subMenus = new TreeMap<>();
         Classification classification =
                 new Classification(name, true, subMenus, EType.TYPE_CLASSIFICATION);
         classificationRepo.insert(classification);
-        return classification;
     }
 
     @Override
@@ -47,23 +41,6 @@ public class ClassificationServiceImpl implements ClassificationService {
         log.info("Added " + subMenuName + " to " + classification.getName());
         return save(classification);
 
-    }
-
-    @Override
-    public Classification deleteSubMenu(String classificationId, String subMenuId) {
-        Classification classification = getById(classificationId);
-
-        try {
-            SubMenu subMenu = subMenuService.getById(subMenuId);
-            subMenuService.deleteById(subMenu.get_id());
-            // need to also remove the reference from the classification
-            classification.getSubMenus().remove(subMenu.getName());
-        } catch (SubMenuNotFoundException ex) {
-            log.error("Tried to remove subMenuId {} from classification {}. Submenu not found.", subMenuId,classificationId);
-            return classification;
-        }
-
-        return save(classification);
     }
 
     @Override
@@ -91,14 +68,6 @@ public class ClassificationServiceImpl implements ClassificationService {
     public Classification save(@NotNull Classification classification) {
         log.info("Saving classification: {}", classification.getName());
         return classificationRepo.save(classification);
-    }
-
-
-
-    @Override
-    public List<SubMenu> subMenuObjects(@NotNull Map<String, String> subMenuMap) {
-        List<String> subMenuIds = new ArrayList<>(new LinkedHashSet<>(subMenuMap.values()));
-        return subMenuIds.stream().map(id -> subMenuService.getById(id)).collect(Collectors.toList());
     }
 
     @Override
@@ -143,7 +112,6 @@ public class ClassificationServiceImpl implements ClassificationService {
             // remove unused subMenus
             classification.setSubMenus(subMenusToRetain);
             save(classification);
-
             // delete the classification if it hasn't been touched
             if (classification.getGravestone()) {
                 deleteById(classification.get_id());

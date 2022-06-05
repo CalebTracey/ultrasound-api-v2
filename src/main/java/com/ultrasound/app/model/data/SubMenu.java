@@ -22,21 +22,4 @@ public class SubMenu {
     private List<ListItem> itemList;
     private EType type = EType.TYPE_SUB_MENU;
     private Boolean gravestone;
-
-//    public SubMenu(String name, List<ListItem> itemList) {
-//        this.name = name;
-//        this.itemList = itemList;
-//    }
-//
-//    public SubMenu(String name, List<ListItem> itemList, EType type) {
-//        this.name = name;
-//        this.itemList = itemList;
-//        this.type = type;
-//    }
-//
-//    public SubMenu(String classification, String name, List<ListItem> itemList) {
-//        this.classification = classification;
-//        this.name = name;
-//        this.itemList = itemList;
-//    }
 }

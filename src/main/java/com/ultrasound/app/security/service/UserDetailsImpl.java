@@ -2,6 +2,9 @@ package com.ultrasound.app.security.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ultrasound.app.model.user.AppUser;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,17 +15,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
-    private final String id;
-    private final String username;
-    private final String email;
+    private String id;
+    private String username;
+    private String email;
 
     @JsonIgnore
-    private final String password;
+    private String password;
 
-    private final Collection<? extends GrantedAuthority> authorities;
+    private Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(String id, String username, String email, String password,
                            Collection<? extends GrantedAuthority> authorities) {

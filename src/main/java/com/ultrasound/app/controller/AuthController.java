@@ -10,8 +10,9 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import com.ultrasound.app.security.jwt.JwtUtils;
 import com.ultrasound.app.security.service.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,21 +35,16 @@ import com.ultrasound.app.security.service.UserDetailsImpl;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    AppUserRepo userRepository;
-    @Autowired
-    RoleRepo roleRepository;
-    @Autowired
-    PasswordEncoder encoder;
-    @Autowired
-    JwtUtils jwtUtils;
-    @Autowired
-    private UserDetailsServiceImpl detailsService;
+    private final AuthenticationManager authenticationManager;
+    private final AppUserRepo userRepository;
+    private final RoleRepo roleRepository;
+    private final PasswordEncoder encoder;
+    private final JwtUtils jwtUtils;
+    private final  UserDetailsServiceImpl detailsService;
 
     @GetMapping("/user/{username}")
     public ResponseEntity<?> userData(@PathVariable String username) {
@@ -57,23 +53,25 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody @NotNull LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody @NotNull LoginRequest loginRequest) throws IllegalAccessException {
         return getAuthenticatedResponse(loginRequest.getUsername(),loginRequest.getPassword());
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody @NotNull RegisterRequest registerRequest) {
-
+    public ResponseEntity<String> registerUser(@Valid @RequestBody @NotNull RegisterRequest registerRequest) {
+        MessageResponse messageResponse = new MessageResponse();
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            messageResponse.setMessage("Error: Username is already taken!");
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+                    .body(messageResponse.getMessage());
         }
 
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            messageResponse.setMessage("Error: Email is already in use!");
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(messageResponse.getMessage());
         }
 
         // Create new user's account
@@ -109,17 +107,21 @@ public class AuthController {
         userRepository.save(user);
 
         // now log them in
-        //return getAuthenticatedResponse(registerRequest.getUsername(),registerRequest.getPassword());
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/sign-up").toUriString());
-        return ResponseEntity.created(uri).body(new MessageResponse("Account created. You'll get an email when your account is approved and activated."));
+        messageResponse.setMessage("Account created. You'll get an email when your account is approved and activated.");
+
+        return ResponseEntity.created(uri).body(messageResponse.getMessage());
     }
 
-    protected ResponseEntity<?> getAuthenticatedResponse(String userName, String password) {
+    protected ResponseEntity<?> getAuthenticatedResponse(String userName, String password) throws IllegalAccessException {
+        MessageResponse messageResponse = new MessageResponse();
+        JwtResponse jwtResponse = new JwtResponse();
         // first check if the account has been approved
         Optional<AppUser> user = userRepository.findByUsername(userName);
         if (user.isPresent() && user.get().getApproved() != null && !user.get().getApproved()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Account pending approval"));
+            messageResponse.setMessage("Account pending approval");
+            return ResponseEntity.badRequest().body(messageResponse.getMessage());
         }
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName, password));
@@ -131,10 +133,16 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok().body(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+        try {
+            jwtResponse.setToken(jwt);
+            jwtResponse.setId(userDetails.getId());
+            jwtResponse.setUsername(userDetails.getUsername());
+            jwtResponse.setEmail(userDetails.getEmail());
+            jwtResponse.setRoles(roles);
+        } catch (IncorrectResultSizeDataAccessException ex){
+            throw new IllegalAccessException(ex.getLocalizedMessage());
+        }
+
+        return ResponseEntity.ok().body(jwtResponse);
     }
 }

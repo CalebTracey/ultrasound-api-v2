@@ -2,12 +2,8 @@ package com.ultrasound.app.aws;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Builder;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.BucketCrossOriginConfiguration;
 import com.amazonaws.services.s3.model.CORSRule;
@@ -15,13 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
-import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
-import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,14 +22,18 @@ import java.util.Objects;
 @Slf4j
 @Configuration
 public class S3Config {
-    @Autowired
-    Environment env;
+    private final Environment env;
+
+    private final AWSCredentialsProviderImpl credentialsProvider;
 
     @Autowired
-    private AWSCredentialsProviderImpl credentialsProvider;
+    public S3Config(AWSCredentialsProviderImpl credentialsProvider, Environment env) {
+        this.credentialsProvider = credentialsProvider;
+        this.env = env;
+    }
 
     @Bean
-    public AmazonS3 amazonS3Client() throws IOException {
+    public AmazonS3 amazonS3Client() {
         BucketCrossOriginConfiguration configuration = new BucketCrossOriginConfiguration();
 
         List<CORSRule.AllowedMethods> rule1AM = new ArrayList<>();
@@ -58,7 +54,7 @@ public class S3Config {
 
             String bucketName = env.getProperty("aws.bucket.name");
             s3Client.setBucketCrossOriginConfiguration(bucketName, configuration);
-            
+
         } catch (AmazonServiceException e) {
             log.error("AmazonServiceException: {}", e.getErrorMessage());
             // The call was transmitted successfully, but Amazon S3 couldn't process
@@ -72,5 +68,4 @@ public class S3Config {
         }
         return s3Client;
     }
-
 }

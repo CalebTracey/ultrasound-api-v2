@@ -2,9 +2,9 @@ package com.ultrasound.app.controller;
 
 import com.ultrasound.app.aws.S3ServiceImpl;
 import com.ultrasound.app.exceptions.PresignedUrlException;
-import com.ultrasound.app.service.SynchService;
+import com.ultrasound.app.service.SyncService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -14,13 +14,12 @@ import java.net.URI;
 @Slf4j
 @CrossOrigin()
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/S3")
 public class S3Controller {
 
-    @Autowired
-    private S3ServiceImpl s3Service;
-    @Autowired
-    private SynchService synchService;
+    private final S3ServiceImpl s3Service;
+    private final SyncService synchService;
 
     @GetMapping("/list")
     public ResponseEntity<?> getPreSignedUrl() {

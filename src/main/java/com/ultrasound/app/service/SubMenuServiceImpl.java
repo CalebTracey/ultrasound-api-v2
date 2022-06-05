@@ -9,6 +9,7 @@ import com.ultrasound.app.model.data.SubMenu;
 import com.ultrasound.app.payload.response.MessageResponse;
 import com.ultrasound.app.repo.SubMenuRepo;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -19,13 +20,12 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SubMenuServiceImpl implements SubMenuService{
 
-    @Autowired
-    private SubMenuRepo subMenuRepo;
+    private final SubMenuRepo subMenuRepo;
 
     @Override
     public SubMenu save(SubMenu subMenu) {
@@ -38,31 +38,13 @@ public class SubMenuServiceImpl implements SubMenuService{
     }
 
     @Override
-    public String insert(SubMenu subMenu) {
-        return subMenuRepo.insert(subMenu).get_id();
-    }
-
-    @Override
     public boolean existsById(String id) {
         return subMenuRepo.existsById(id);
     }
 
     @Override
-    public MessageResponse deleteById(String id) {
-        SubMenu subMenu = getById(id);
-        String name = subMenu.getName();
-
-        int count = subMenu.getItemList().size();
-        log.info("Deleting Submenu {} and {} listItems",name, count);
-        subMenuRepo.delete(subMenu);
-
-        return new MessageResponse("Deleted submenu " + name + " and " + count + " list items");
-    }
-
-    @Override
     public SubMenu createNew(String classificationId, String name) {
         SubMenu newSubMenu = new SubMenu(null,classificationId,name,new ArrayList<>(), EType.TYPE_SUB_MENU, false);
-        //new SubMenu(name, new ArrayList<>(), EType.TYPE_SUB_MENU);
         return save(newSubMenu);
     }
 
@@ -111,5 +93,10 @@ public class SubMenuServiceImpl implements SubMenuService{
         }
 
         return false;
+    }
+
+    @Override
+    public void deleteById(String subMenuId) {
+        subMenuRepo.deleteById(subMenuId);
     }
 }

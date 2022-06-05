@@ -8,16 +8,16 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="react-spring-jwt" />
+        <module name="ultrasound-api-v2" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="react-spring-jwt" target="11" />
+      <module name="ultrasound-api-v2" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="react-spring-jwt" options="-parameters" />
+      <module name="ultrasound-api-v2" options="-parameters" />
     </option>
   </component>
 </project>
