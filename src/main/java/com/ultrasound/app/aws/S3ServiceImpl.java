@@ -7,57 +7,35 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.ultrasound.app.model.data.Classification;
-import com.ultrasound.app.model.data.EType;
-import com.ultrasound.app.model.data.ListItem;
-import com.ultrasound.app.model.data.SubMenu;
-import com.ultrasound.app.payload.response.MessageResponse;
-import com.ultrasound.app.service.ClassificationServiceImpl;
-import com.ultrasound.app.service.SubMenuService;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Configuration
+@AllArgsConstructor
+@NoArgsConstructor
 public class S3ServiceImpl implements S3Service {
 
-    private final AmazonS3 s3Client;
+    private AmazonS3 s3Client;
 
-    @Autowired
-    private ClassificationServiceImpl classificationService;
-    @Autowired
-    private SubMenuService subMenuService;
-    @Autowired
-    Environment env;
-
-    public S3ServiceImpl(AmazonS3 s3Client) {
-        this.s3Client = s3Client;
-    }
+    private Environment env;
 
     private String getAWSBucketName() {
         return env.getProperty("aws.bucket.name");
     }
-
-
 
     private @NotNull List<S3ObjectSummary> s3FileNames() {
         List<S3ObjectSummary> objectListing = s3ListObjects();
@@ -75,51 +53,6 @@ public class S3ServiceImpl implements S3Service {
         return s3FileNames().stream().map(S3ObjectSummary::getKey)     // keys = title of file
                 .collect(Collectors.toList());
     }
-
-//    /**
-//     * Utility method that takes a single file name as an input and creates a new
-//     * SingleFileStructure object.
-//     *
-//     * @param file The original file name. Also the key for file in S3 Bucket.
-//     * @return A new SingleFileStructure object.
-//     */
-//    private @NotNull Optional<SingleFileStructure> normalizeFileData(String file) throws ParseException {
-//        SingleFileStructure fileStructure = new SingleFileStructure();
-//        String fileNormalized = StringUtils.normalizeSpace(file);
-//        String[] splitFilePre = StringUtils.split(fileNormalized, "-.");
-//
-//        //confirm we have all the tokens we need (classification, submenu, listitem, sequence)
-//        if (splitFilePre.length != 5) {
-//            throw new ParseException("found " + splitFilePre.length + " elements. Expected 5", splitFilePre.length);
-//        }
-//
-//        //confirm good sequence
-//        int sequence = 0;
-//        try {
-//            sequence = Integer.parseInt(splitFilePre[3].trim());
-//        } catch (NumberFormatException nfe) {
-//            throw new ParseException("Bad sequence number: " + splitFilePre[3], 3);
-//        }
-//
-//        //confirm good filetype
-//        String extension = splitFilePre[4].toLowerCase();
-//        ListItem.MediaType mediaType = null;
-//        if (extension.equals("mp4")) {
-//            mediaType = ListItem.MediaType.VIDEO;
-//        } else if (extension.equals("jpg") || extension.equals("jpeg") || extension.equals("gif") || extension.equals("png")) {
-//            mediaType = ListItem.MediaType.IMAGE;
-//        } else {
-//            throw new ParseException("Bad file extension " + extension, 4);
-//        }
-//
-//        List<String> splitFile =
-//                Arrays.stream(splitFilePre).map(StringUtils::trim).collect(Collectors.toList());
-//
-//        fileStructure.setClassification(splitFile.get(0)); // set Classification name
-//        fileStructure.setSubMenuName(splitFile.get(1));
-//        fileStructure.setScan(new ListItem(splitFile.get(2),splitFile.get(2),file,sequence,EType.TYPE_ITEM,mediaType,false));
-//        return Optional.of(fileStructure);
-//    }
 
     @Override
     public @NotNull Optional<String> getPreSignedUrl(String link) {
@@ -167,37 +100,5 @@ public class S3ServiceImpl implements S3Service {
         String[] extensions = new String[]{"mp4", "*.mp4","jpg", "*.jpg", "jpeg", "*.jpeg", "gif", "*.gif", "png", "*.png"};
         return FilenameUtils.isExtension(objectSummary.getKey(), extensions);
     }
-
-//    @Data
-//    @AllArgsConstructor
-//    @NoArgsConstructor
-//    public static
-//    class SingleFileStructure {
-//        private @NotNull String classification;
-//        private String subMenuName;
-//        private ListItem scan;
-//        private String link;
-//        private Boolean hasSubMenu;
-//        private Boolean hasScan;
-//
-//        public SingleFileStructure(@NotNull String classification, ListItem scan, String link, Boolean hasSubMenu, Boolean hasScan) {
-//            this.classification = classification;
-//            this.scan = scan;
-//            this.link = link;
-//            this.hasSubMenu = hasSubMenu;
-//            this.hasScan = hasScan;
-//        }
-//    }
-//
-//    @Data
-//    @AllArgsConstructor
-//    @NoArgsConstructor
-//    public static
-//    class FileStructureSubMenu {
-//        private String classification;
-//        private String name;
-//        private List<ListItem> itemList;
-//    }
-
 }
 

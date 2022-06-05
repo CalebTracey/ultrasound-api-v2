@@ -58,14 +58,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             log.error("Cannot set user authentication: {}", e.getMessage());
         }
 
-        //TODO config for cors "cross-origin"
-//        assert response != null;
         assert response != null;
         response.setHeader("Access-Control-Allow-Origin", env.getProperty("ultrasound.app.cors-config.urls"));
-//        response.setHeader("Access-Control-Allow-Credentials", "true");
-//        response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
-//        response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, Access-Control-Allow-Methods, Authorization, Content-Type");
-//        response.setHeader("Access-Control-Max-Age", "3600");
 
         assert filterChain != null;
         filterChain.doFilter(request, response);
@@ -75,7 +69,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         String headerAuth = request.getHeader("Authorization");
 
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7, headerAuth.length());
+            return headerAuth.substring(7);
         }
 
         return null;

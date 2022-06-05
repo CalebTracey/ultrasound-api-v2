@@ -3,6 +3,7 @@ package com.ultrasound.app.aws;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
@@ -11,9 +12,12 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class AWSCredentialsProviderImpl implements AWSCredentialsProvider {
 
-    @Autowired
-    private AWSCredentialsConfig credentialsConfig;
+    private final AWSCredentialsConfig credentialsConfig;
 
+    @Autowired
+    public AWSCredentialsProviderImpl (AWSCredentialsConfig credentialsConfig) {
+        this.credentialsConfig = credentialsConfig;
+    }
     @Override
     public AWSCredentials getCredentials() {
         return credentialsConfig;

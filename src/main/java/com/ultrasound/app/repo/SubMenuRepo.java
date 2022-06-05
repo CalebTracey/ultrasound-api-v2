@@ -8,5 +8,4 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface SubMenuRepo extends MongoRepository<SubMenu, String> {
-    Optional<SubMenu> findByName(String name);
 }

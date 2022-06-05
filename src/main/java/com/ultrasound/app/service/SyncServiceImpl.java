@@ -1,19 +1,15 @@
 package com.ultrasound.app.service;
 
-import com.ultrasound.app.aws.S3Service;
-import com.ultrasound.app.aws.S3ServiceImpl;
 import com.ultrasound.app.model.data.Classification;
 import com.ultrasound.app.model.data.EType;
 import com.ultrasound.app.model.data.ListItem;
 import com.ultrasound.app.model.data.SubMenu;
 import com.ultrasound.app.payload.response.MessageResponse;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.ultrasound.app.service.models.SingleFileStructure;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -25,61 +21,55 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class SynchServiceImpl implements SynchService {
-    @Autowired
-    S3Service s3Service;
-    @Autowired
-    private ClassificationService classificationService;
-    @Autowired
-    private SubMenuService subMenuService;
+@RequiredArgsConstructor
+public class SyncServiceImpl implements SyncService {
+
+    private final ClassificationService classificationService;
+    private final  SubMenuService subMenuService;
 
     // Look at the S3 bucket and make any database changes needed
     @Override
     public MessageResponse synchronize(List<String> files) {
-        // clear all the gravestone flags in the DB so we know which ones to delete at the end
+        // clear all the gravestone flags in the DB, so we know which ones to delete at the end
         classificationService.clearGravestones();
-
         // iterate over the files and create categories, submenus as needed
         StringBuilder builder = new StringBuilder();
 
         files.forEach(name -> {
             try {
-                Optional<SingleFileStructure> fileData = normalizeFileData(name);
+                Optional<SingleFileStructure> fileData;
+                fileData = normalizeFileData(name);
                 if (fileData.isPresent()) {
                     // does the classification already exist?
                     if (!classificationService.classificationExists(fileData.get().getClassification())) {
                         // if not, create it
                         classificationService.createNew(fileData.get().getClassification());
                     }
-
-
                     Classification classification = classificationService.getByName(fileData.get().getClassification());
                     classification.setGravestone(false);
                     classificationService.save(classification);
 
                     // does the subMenu exist?
-                    String submenuName = fileData.get().subMenuName;
+                    String submenuName = fileData.get().getSubMenuName();
                     if (!classification.getSubMenus().containsKey(submenuName)) {
                         classification = classificationService.addNewSubMenu(classification.get_id(), submenuName);
                     }
-
-
                     String subMenuId = classification.getSubMenus().get(submenuName);
                     SubMenu subMenu = subMenuService.getById(subMenuId);
                     subMenu.setGravestone(false);
                     subMenuService.save(subMenu);
 
                     // does the submenu have the listItem?
-                    Predicate<ListItem> linkMatch = listItem -> listItem.getLink().equals(fileData.get().getScan().getLink());
-                    if (subMenu.getItemList().stream().noneMatch(linkMatch)) {
-                        subMenu.getItemList().add(fileData.get().scan);
-                    } else if (subMenu.getItemList().stream().anyMatch(linkMatch)) {
+                    Predicate<ListItem> linkMatchPredicate = listItem -> listItem.getLink().equals(fileData.get().getScan().getLink());
+                    if (subMenu.getItemList().stream().noneMatch(linkMatchPredicate)) {
+                        subMenu.getItemList().add(fileData.get().getScan());
+                    } else if (subMenu.getItemList().stream().anyMatch(linkMatchPredicate)) {
                         // clear the gravestone
-                        subMenu.getItemList().stream().filter(linkMatch).findFirst().get().setGraveStone(false);
+                        Optional<ListItem> linkMatch = subMenu.getItemList().stream().filter(linkMatchPredicate).findFirst();
+                        linkMatch.ifPresent(listItem -> listItem.setGraveStone(false));
                     }
                     subMenuService.save(subMenu);
                 }
-
             } catch (ParseException e) {
                 builder.append("Bad file name: ").append(name).append(" Error: ").append(e.getMessage()).append("</br>");
             }
@@ -90,22 +80,9 @@ public class SynchServiceImpl implements SynchService {
         return new MessageResponse(builder.toString());
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static
-    class SingleFileStructure {
-        private @NotNull String classification;
-        private String subMenuName;
-        private ListItem scan;
-        private String link;
-        private Boolean hasSubMenu;
-        private Boolean hasScan;
-    }
-
     @NotNull
     public Optional<SingleFileStructure> normalizeFileData(String file) throws ParseException {
-        SynchServiceImpl.SingleFileStructure fileStructure = new SynchServiceImpl.SingleFileStructure();
+        SingleFileStructure fileStructure = new SingleFileStructure();
         String fileNormalized = StringUtils.normalizeSpace(file);
         String[] splitFilePre = StringUtils.split(fileNormalized, "-.");
 
@@ -139,6 +116,7 @@ public class SynchServiceImpl implements SynchService {
         fileStructure.setClassification(splitFile.get(0)); // set Classification name
         fileStructure.setSubMenuName(splitFile.get(1));
         fileStructure.setScan(new ListItem(splitFile.get(2), splitFile.get(2), file, sequence, EType.TYPE_ITEM, mediaType, false));
+
         return Optional.of(fileStructure);
     }
 

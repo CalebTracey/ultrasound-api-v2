@@ -26,7 +26,7 @@ class S3RepositoryTest {
     @BeforeEach
     void setUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
-        s3ServiceTest = new S3ServiceImpl(config);
+        s3ServiceTest = new S3ServiceImpl();
     }
 
     @AfterEach

@@ -1,5 +1,8 @@
 package com.ultrasound.app.payload.response;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class MessageResponse {
     private String message;
 

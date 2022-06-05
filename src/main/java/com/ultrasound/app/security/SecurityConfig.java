@@ -39,13 +39,11 @@ import java.util.*;
 @PropertySource("classpath:/application-${spring.profiles.active}.properties")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    Environment env;
+    private final Environment env;
 
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
+    private final UserDetailsServiceImpl userDetailsService;
+
+    private final  AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
