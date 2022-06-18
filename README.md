@@ -10,6 +10,10 @@ See the repository for the frontend here:
 [Frontend code](https://github.com/CalebTracey/ultrasound-ui-v2)
 <br />
 
+I learned a great deal about backend development with this project. Some challenges included learning how to handle interactions and buisness logic involved with AWS S3 and MongoDB. The backend can initally parse the list of files in S3, removing bad formats and corrupted files and then parsing file names into readable titles. The addresses are saved in MongoDB where a presigned URL can be fetched through the AWS functionality. 
+
+Navigating Spring Security and JWT was also a great learning experience and a fun challenge. 
+
 ## Usage
 Currently, you'll need to create and populate an S3 Bucket with .mp4 files and connect it to the backend through the AWS CLI.
 
