@@ -4,7 +4,7 @@
 ## Overview
 This app was developed for a fellowship program through my local hospital. It provides a way to easily navagate 3000+ .mp4 files and allows editing and restructuring of data through a simple user interface. Files are parsed by name and the resulting data is modeled and stored in a mongo database.
 
-Created with React/TypeScript + Spring Boot + MongoDB. Authentication through Spring Security + JWT for role-based routing and privelages.
+The backend was built with Spring Boot to interact with the Mongo database. Authentication is done through Spring Security + JWT for role-based routing and privelages.
 
 See the repository for the frontend here: 
 [Frontend code](https://github.com/CalebTracey/ultrasound-ui-v2)
@@ -44,15 +44,13 @@ If you would rather skip the Docker proccess for the front/backend, follow the s
 You will still need to run the docker-compose file to get mongodb running locally. Just comment out the frontend/backend sections in the file.
 <br />
 <br />
+`mvn clean install`
+<br />
+<br />
+and:
+<br />
+<br />
 `mvn spring-boot:run`
 <br />
 <br />
-for the client, navigate to "react-client" and run:
-<br />
-<br />
-`yarn start`
-<br />
-<br />
-Then use the app locally on [localhost:3000](http://localhost:3000/)
-<br />
-<br />
+
